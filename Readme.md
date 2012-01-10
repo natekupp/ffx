@@ -6,17 +6,32 @@ FFX is a technique for symbolic regression. It is:
 - __Scalable__ - 1000 input variables, no problem!
 - __Deterministic__ - no need to "hope and pray".
 
-### Technical details
+## Installation
+To install from PyPI, simply run:
+
+	sudo pip install ffx
+
+## Usage
+A simple example of usage is:
+
+	models = MultiFFXModelFactory().build(train_X, train_y, test_X, test_y, varnames)
+	for model in models:
+		yhat = model.simulate(X)
+		print model
+
+## More Information
+
+#### Technical details
 
 - Circuits-oriented description: [Slides](http://trent.st/content/2011-CICC-FFX-slides.ppt) [Paper](http://trent.st/content/2011-CICC-FFX-paper.pdf) (CICC 2011)
 - AI-oriented description [Slides](http://trent.st/content/2011-GPTP-FFX-slides.pdf) [Paper](http://trent.st/content/2011-GPTP-FFX-paper.pdf) (GPTP 2011)
 
-### Code
+#### Code
 * FFX.py (v1.3) - implements FFX algorithm
 * runffx.py (v1.3) - toolkit for command-line testing of FFX
 
 
-### Dependencies
+#### Dependencies
 * python (tested on 2.5, 2.6, and 2.7)
 * numpy (1.6.0+)
 * scipy (0.9.0+) 
@@ -33,13 +48,13 @@ Datasets are included as .tar.gz files under the `example-datasets/` folder.
 	- [Part3 14M] - `high-dimensional_benchmark_datasets_part3.tar.gz`
 
 
-### References
+#### References
 
 1. McConaghy, FFX: Fast, Scalable, Deterministic Symbolic Regression Technology, _Genetic Programming Theory and Practice IX_, Edited by R. Riolo, E. Vladislavleva, and J. Moore, Springer, 2011.
 2. McConaghy, High-Dimensional Statistical Modeling and Analysis of Custom Integrated Circuits, _Proc. Custom Integrated Circuits Conference_, Sept. 2011
 
 
-### License
+## License
 FFX Software Licence Agreement (like BSD, but adapted for non-commercial gain only)
 
 Copyright (c) 2011, Solido Design Automation Inc.  Authored by Trent McConaghy.
