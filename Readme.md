@@ -14,7 +14,8 @@ To install from PyPI, simply run:
 ## Usage
 A simple example of usage is:
 
-	models = MultiFFXModelFactory().build(train_X, train_y, test_X, test_y, varnames)
+	import ffx
+	models = ffx.MultiFFXModelFactory().build(train_X, train_y, test_X, test_y, varnames)
 	for model in models:
 		yhat = model.simulate(X)
 		print model
