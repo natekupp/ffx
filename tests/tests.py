@@ -4,7 +4,7 @@ import FFX, pandas
 class TestFFX:
     def setUp(self): 
         self.EPS = 0.001
-        self.data = pandas.read_csv('example-datasets/iris.csv')
+        self.data = pandas.read_csv('iris.csv')
         self.xtrain_pandas = self.data.ix[:50,0:2]
         self.xtest_pandas  = self.data.ix[51:100,0:2]
         self.xtrain        = self.xtrain_pandas.as_matrix()
