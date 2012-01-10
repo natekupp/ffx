@@ -22,42 +22,46 @@ class TestFFX:
         return self.similar(model.simulate(self.xtrain), data)
 
     def testSimpleBase(self):
-        assert self.runBase(ffx.SimpleBase(0,1), self.xtrain[:,0])
-        assert self.runBase(ffx.SimpleBase(0,2), self.xtrain[:,0]**2)
+        assert self.runBase(ffx.core.SimpleBase(0,1), self.xtrain[:,0])
+        assert self.runBase(ffx.core.SimpleBase(0,2), self.xtrain[:,0]**2)
 
     def testOperatorBase(self):
         a = ffx.SimpleBase(0,1)
-        assert self.runBase(ffx.OperatorBase(a, ffx.OP_ABS),        np.abs(self.xtrain[:,0]))
-        assert self.runBase(ffx.OperatorBase(a, ffx.OP_MAX0),       np.clip(self.xtrain[:,0], 0.0, ffx.INF))
-        assert self.runBase(ffx.OperatorBase(a, ffx.OP_MIN0),       np.clip(self.xtrain[:,0], -ffx.INF, 0.0))
-        assert self.runBase(ffx.OperatorBase(a, ffx.OP_LOG10),      np.log10(self.xtrain[:,0]))
-        assert self.runBase(ffx.OperatorBase(a, ffx.OP_GTH, 0.5),   np.clip(0.5 - self.xtrain[:,0], 0.0, ffx.INF))
-        assert self.runBase(ffx.OperatorBase(a, ffx.OP_LTH, 0.5),   np.clip(self.xtrain[:,0] - 0.5, 0.0, ffx.INF))
+        assert self.runBase(ffx.core.OperatorBase(a, ffx.OP_ABS),        np.abs(self.xtrain[:,0]))
+        assert self.runBase(ffx.core.OperatorBase(a, ffx.OP_MAX0),       np.clip(self.xtrain[:,0], 0.0, ffx.INF))
+        assert self.runBase(ffx.core.OperatorBase(a, ffx.OP_MIN0),       np.clip(self.xtrain[:,0], -ffx.INF, 0.0))
+        assert self.runBase(ffx.core.OperatorBase(a, ffx.OP_LOG10),      np.log10(self.xtrain[:,0]))
+        assert self.runBase(ffx.core.OperatorBase(a, ffx.OP_GTH, 0.5),   np.clip(0.5 - self.xtrain[:,0], 0.0, ffx.INF))
+        assert self.runBase(ffx.core.OperatorBase(a, ffx.OP_LTH, 0.5),   np.clip(self.xtrain[:,0] - 0.5, 0.0, ffx.INF))
 
     def testProductBase(self):
-        a = ffx.SimpleBase(0,1)
-        b = ffx.SimpleBase(0,1)
-        c = ffx.SimpleBase(0,2)
-        assert self.runBase(ffx.ProductBase(a,b), self.xtrain[:,0]**2)
-        assert self.runBase(ffx.ProductBase(a,c), self.xtrain[:,0]**3)
+        a = ffx.core.SimpleBase(0,1)
+        b = ffx.core.SimpleBase(0,1)
+        c = ffx.core.SimpleBase(0,2)
+        assert self.runBase(ffx.core.ProductBase(a,b), self.xtrain[:,0]**2)
+        assert self.runBase(ffx.core.ProductBase(a,c), self.xtrain[:,0]**3)
 
 
     # ----------------------------------------------------------------
-    # Test models
+    # Test constant model
     # ----------------------------------------------------------------
     def testConstantModel(self):
         mu = self.xtrain[:,0].mean()
-        a  = ffx.ConstantModel(mu,0).simulate(self.xtrain)
-        assert self.runBase(ffx.ConstantModel(mu,0),np.repeat(mu, self.xtrain.shape[0]))
+        a  = ffx.core.ConstantModel(mu,0).simulate(self.xtrain)
+        assert self.runBase(ffx.core.ConstantModel(mu,0),np.repeat(mu, self.xtrain.shape[0]))
 
+    # ----------------------------------------------------------------
+    # Test FFX API
+    # ----------------------------------------------------------------
     def testMultiFFXModelFactory(self):
         # Use numpy.ndarray
-        models = ffx.MultiFFXModelFactory().build(self.xtrain, self.ytrain, self.xtest, self.ytest, self.data.columns)
+        models = ffx.run(self.xtrain, self.ytrain, self.xtest, self.ytest, self.data.columns)
         assert abs(np.mean([model.test_nmse for model in models]) - 0.4391323) < self.EPS
 
         # Use pandas.DataFrame
-        models = ffx.MultiFFXModelFactory().build(self.xtrain_pandas, self.ytrain, self.xtest_pandas, self.ytest)
+        models = ffx.run(self.xtrain_pandas, self.ytrain, self.xtest_pandas, self.ytest)
         assert abs(np.mean([model.test_nmse for model in models]) - 0.4391323) < self.EPS        
+
 
 
 
