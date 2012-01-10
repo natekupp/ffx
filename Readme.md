@@ -9,10 +9,10 @@ FFX is a technique for symbolic regression. It is:
 ## Installation
 To install from PyPI, simply run:
 
-	sudo pip install ffx
+	pip install ffx
 
 ## Usage
-A simple example of usage is:
+A simple example of how to use FFX is:
 
 	import ffx
 	models = ffx.run(train_X, train_y, test_X, test_y, varnames)
