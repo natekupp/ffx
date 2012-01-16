@@ -12,7 +12,14 @@ To install from PyPI, simply run:
 	pip install ffx
 
 ## Usage
-A simple example of how to use FFX is:
+FFX can either be run in stand-alone mode, or within your existing Python code. It installs both a binary `runffx` and the Python module `ffx`.
+
+* Standalone: 
+
+	runffx test TRAIN_IN.csv TRAIN_OUT.csv TEST_IN.csv TEST_OUT.csv
+
+
+* The following snippet demonstrates how to use FFX within your existing Python code. Note that all arguments are expected to be of type `numpy.ndarray` or `pandas.DataFrame`.
 
 	import ffx
 	models = ffx.run(train_X, train_y, test_X, test_y, varnames)
@@ -20,7 +27,7 @@ A simple example of how to use FFX is:
 		yhat = model.simulate(X)
 		print model
 
-Presently, the FFX package only exposes a single API method, `ffx.run()`.
+Presently, the FFX Python module only exposes a single API method, `ffx.run()`.
 
 
 ## More Information

@@ -159,7 +159,7 @@ because the output is scalar.  Values in a given row are separated by spaces.
     #got the right number of args?  If not, output help
     num_args = len(args)
     if not (4 <= num_args <= 5):
-        print help, '\nGot %d args. Need 4 or 5.' % len(num_args); return
+        print help, '\nGot %d args. Need 4 or 5.' % num_args; return
     print "Begin ffx test."
 
     #get X/y
