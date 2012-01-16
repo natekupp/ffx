@@ -43,12 +43,18 @@ CONSIDER_NONLIN = True #consider abs() and log()?
 CONSIDER_THRESH = True #consider hinge functions?
 
 #======================================================================================
-import copy, itertools, math, signal, time, types, pandas
+import copy, itertools, math, signal, time, types
 
 #3rd party dependencies
 import numpy
 import scipy
 from scikits.learn.linear_model.coordinate_descent import ElasticNet
+
+# Make dependency on pandas optional.
+try:
+    import pandas
+except ImportError:
+    pandas = None
 
 INF = float('Inf')
 MAX_TIME_REGULARIZE_UPDATE = 5 #maximum time (s) for regularization update during pathwise learn.
@@ -386,7 +392,7 @@ class MultiFFXModelFactory:
           models -- list of FFXModel -- Pareto-optimal set of models
         """
         
-        if isinstance(train_X, pandas.DataFrame):
+        if pandas is not None and isinstance(train_X, pandas.DataFrame):
             varnames = train_X.columns
             train_X = train_X.as_matrix()
             test_X = test_X.as_matrix()
@@ -488,7 +494,7 @@ class FFXModelFactory:
         @return
           models -- list of FFXModel -- Pareto-optimal set of models
         """
-        if isinstance(X, pandas.DataFrame):
+        if pandas is not None and isinstance(X, pandas.DataFrame):
             varnames = X.columns
             X = X.as_matrix()
         if isinstance(X, numpy.ndarray) and varnames == None:
