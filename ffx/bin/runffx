@@ -127,8 +127,8 @@ Simply prints the number of variables and number of samples for the given ascii 
 
 """    
     if len(args) != 1:
-        print help, "\nGot %d arguments; need 1." % num_args; return
-      
+        print help, "\nGot %d arguments; need 1." % len(args); return
+    
     d = numpy.shape(read(args[0]))
     if len(d) == 1:
         d = 1,d[0]
