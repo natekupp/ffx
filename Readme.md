@@ -12,14 +12,17 @@ To install from PyPI, simply run:
 	pip install ffx
 
 ## Usage
-FFX can either be run in stand-alone mode, or within your existing Python code. It installs both a binary `runffx` and the Python module `ffx`.
+FFX can either be run in stand-alone mode, or within your existing Python code. It installs both a command-line utility `runffx` and the Python module `ffx`.
 
-* Standalone: 
+__Standalone__
 
-	runffx test TRAIN_IN.csv TRAIN_OUT.csv TEST_IN.csv TEST_OUT.csv
+	runffx test train_X.csv train_y.csv test_X.csv test_y.csv
 
+You can run `runffx help` for more information on using the command-line utility.
 
-* The following snippet demonstrates how to use FFX within your existing Python code. Note that all arguments are expected to be of type `numpy.ndarray` or `pandas.DataFrame`.
+__Python Module__
+
+The following snippet demonstrates how to use FFX within your existing Python code. Note that all arguments are expected to be of type `numpy.ndarray` or `pandas.DataFrame`.
 
 	import ffx
 	models = ffx.run(train_X, train_y, test_X, test_y, varnames)
