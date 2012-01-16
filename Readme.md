@@ -33,26 +33,16 @@ The following snippet demonstrates how to use FFX within your existing Python co
 Presently, the FFX Python module only exposes a single API method, `ffx.run()`.
 
 
-## More Information
-
-#### Technical details
-
-- Circuits-oriented description: [Slides](http://trent.st/content/2011-CICC-FFX-slides.ppt) [Paper](http://trent.st/content/2011-CICC-FFX-paper.pdf) (CICC 2011)
-- AI-oriented description [Slides](http://trent.st/content/2011-GPTP-FFX-slides.pdf) [Paper](http://trent.st/content/2011-GPTP-FFX-paper.pdf) (GPTP 2011)
-
-#### Code
-* FFX.py (v1.3) - implements FFX algorithm
-* runffx.py (v1.3) - toolkit for command-line testing of FFX
-
-
-#### Dependencies
+## Dependencies
 * python (tested on 2.5, 2.6, and 2.7)
 * numpy (1.6.0+)
 * scipy (0.9.0+) 
 * scikits.learn (0.8+)
+* pandas (optional, enables support for labeled `pandas.DataFrame` datasets)
 
-### Real-world test datasets:
-Datasets are included as .tar.gz files under the `example-datasets/` folder.
+
+## Real-world test datasets:
+Datasets are included as .tar.gz files under the `ffx/example-datasets/` folder.
 
 * 6 Medium-dim. problems 
 	- [All 36K] - `med-dimensional_benchmark_datasets.tar.gz`
@@ -62,7 +52,12 @@ Datasets are included as .tar.gz files under the `example-datasets/` folder.
 	- [Part3 14M] - `high-dimensional_benchmark_datasets_part3.tar.gz`
 
 
-#### References
+## Technical details
+- Circuits-oriented description: [Slides](http://trent.st/content/2011-CICC-FFX-slides.ppt) [Paper](http://trent.st/content/2011-CICC-FFX-paper.pdf) (CICC 2011)
+- AI-oriented description [Slides](http://trent.st/content/2011-GPTP-FFX-slides.pdf) [Paper](http://trent.st/content/2011-GPTP-FFX-paper.pdf) (GPTP 2011)
+
+
+## References
 
 1. McConaghy, FFX: Fast, Scalable, Deterministic Symbolic Regression Technology, _Genetic Programming Theory and Practice IX_, Edited by R. Riolo, E. Vladislavleva, and J. Moore, Springer, 2011.
 2. McConaghy, High-Dimensional Statistical Modeling and Analysis of Custom Integrated Circuits, _Proc. Custom Integrated Circuits Conference_, Sept. 2011
