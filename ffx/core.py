@@ -280,7 +280,7 @@ class OperatorBase:
         ok = True
         y_lin = self.simple_base.simulate(X)
 
-        if op == OP_ABS:     ya = abs(y_lin)
+        if op == OP_ABS:     ya = numpy.abs(y_lin)
         elif op == OP_MAX0:  ya = numpy.clip(y_lin, 0.0, INF)
         elif op == OP_MIN0:  ya = numpy.clip(y_lin, -INF, 0.0)
         elif op == OP_LOG10:
@@ -958,14 +958,14 @@ def yIsPoor(y):
 def coefStr(x):
     """Gracefully print a number to 3 significant digits.  See _testCoefStr in unit tests"""
     if x == 0.0:        s = '0'
-    elif abs(x) < 1e-4: s = ('%.2e' % x).replace('e-0', 'e-')
-    elif abs(x) < 1e-3: s = '%.6f' % x
-    elif abs(x) < 1e-2: s = '%.5f' % x
-    elif abs(x) < 1e-1: s = '%.4f' % x
-    elif abs(x) < 1e0:  s = '%.3f' % x
-    elif abs(x) < 1e1:  s = '%.2f' % x
-    elif abs(x) < 1e2:  s = '%.1f' % x
-    elif abs(x) < 1e4:  s = '%.0f' % x
+    elif numpy.abs(x) < 1e-4: s = ('%.2e' % x).replace('e-0', 'e-')
+    elif numpy.abs(x) < 1e-3: s = '%.6f' % x
+    elif numpy.abs(x) < 1e-2: s = '%.5f' % x
+    elif numpy.abs(x) < 1e-1: s = '%.4f' % x
+    elif numpy.abs(x) < 1e0:  s = '%.3f' % x
+    elif numpy.abs(x) < 1e1:  s = '%.2f' % x
+    elif numpy.abs(x) < 1e2:  s = '%.1f' % x
+    elif numpy.abs(x) < 1e4:  s = '%.0f' % x
     else:               s = ('%.2e' % x).replace('e+0', 'e')
     return s
 
