@@ -6,3 +6,5 @@ build
 ez_setup.py
 setuptools-*.egg
 *.egg-info
+*.c
+*.so
