@@ -40,7 +40,7 @@ import copy, itertools, math, time, types
 #3rd party dependencies
 import numpy
 import scipy
-from scikits.learn.linear_model.coordinate_descent import ElasticNet
+from sklearn.linear_model import ElasticNet
 
 from timeout    import *
 from core_utils import *
@@ -60,6 +60,8 @@ def _approachStr(approach):
         (approach[0], approach[1], approach[2], approach[3], approach[4])
 
 
+
+
 #========================================================================================
 #models / bases
 class FFXModel:
@@ -77,8 +79,8 @@ class FFXModel:
         assert   len(bases_d) == len(coefs_d)  #denom_bases == denom_coefs
 
         #make sure that the coefs line up with their 'pretty' versions
-        coefs_n = numpy.array([float(coefStr(coef)) for coef in coefs_n])
-        coefs_d = numpy.array([float(coefStr(coef)) for coef in coefs_d])
+        coefs_n = numpy.array(coefs_n) #numpy.array([float(coefStr(coef)) for coef in coefs_n])
+        coefs_d = numpy.array(coefs_d) #numpy.array([float(coefStr(coef)) for coef in coefs_d])
 
         #reorder numerator bases from highest-to-lowest influence 
         # -but keep offset 0th of course
@@ -225,7 +227,7 @@ class MultiFFXModelFactory:
                             if sum(approach) >= 4: continue #not too many features at once
                             approaches.append(approach)
                             if verbose:
-                                print '\t'.join(['Yes' if a else 'No' for a in approach]) #"  ", _approachStr(approach)
+                                print '\t'.join(['Yes' if a else 'No' for a in approach])
 
         for (i, approach) in enumerate(approaches): 
             if verbose:
@@ -268,13 +270,10 @@ class MultiFFXModelFactory:
 
         return models
 
-    def _FFXapproach(self, inter, denom, expon, nonlin, thresh):
-        return 'FFX inter%d denom%d expon%d nonlin%d thresh%d' % \
-            (inter, denom, expon, nonlin, thresh)
-
     def _nondominatedModels(self, models):
-        test_nmses = [model.test_nmse for model in models]
-        num_bases = [model.numBases() for model in models]
+        test_nmses = numpy.array([model.test_nmse for model in models], dtype=numpy.float64)
+        num_bases  = numpy.array([model.numBases() for model in models], dtype=numpy.int32)
+
         I = nondominatedIndices2d(test_nmses, num_bases)
         models = [models[i] for i in I]
 
@@ -322,7 +321,6 @@ class FFXModelFactory:
             return [ConstantModel(y.mean(), 0)]
         
         #Main work... 
-        
         #build up each combination of all {var_i} x {op_j}, except for
         # when a combination is unsuccessful
         if verbose:
@@ -346,9 +344,7 @@ class FFXModelFactory:
                         if nonlin_op == OP_MIN0 and max(lin_yhat) <= 0: continue 
 
                         nonsimple_base = OperatorBase(simple_base, nonlin_op, numpy.Inf)
-                        #nonsimple_base.var = var_i #easy access when considering interactions
-
-                        nonlin_yhat = nonsimple_base.simulate(X)
+                        nonlin_yhat    = nonsimple_base.simulate(X)
                         if numpy.all(nonlin_yhat == lin_yhat): continue #op has no effect
                         if not yIsPoor(nonlin_yhat):
                             order1_bases.append(nonsimple_base)
@@ -363,7 +359,6 @@ class FFXModelFactory:
                         for threshold_op in ss.thresholdOps(): 
                             for thr in thrs:
                                 nonsimple_base = OperatorBase(simple_base, threshold_op, thr)
-                                #nonsimple_base.var = var_i #easy access when considering interactions
                                 order1_bases.append(nonsimple_base)
         if verbose:
             print '  STEP 1A: Build order-1 bases: done.  Have %d order-1 bases.' % len(order1_bases)
@@ -492,8 +487,7 @@ class FFXModelFactory:
         # -"unbias" = rescale so that (mean=0, stddev=1) -- subtract each row's mean, then divide by stddev
         # -X transposed
         # -X as fortran array
-        (X_unbiased, y_unbiased, X_avgs, X_stds, y_avg, y_std) = self._unbiasedXy(X_orig_regress, y_orig)
-        X_unbiased = numpy.asfortranarray(X_unbiased) # make data contiguous in memory
+        (X_unbiased, y_unbiased, X_avgs, X_stds, y_avg, y_std) = unbiasedXy(X_orig_regress, y_orig)
 
         n_samples = X_unbiased.shape[0]
         vals = numpy.dot(X_unbiased.T, y_unbiased)
@@ -508,20 +502,20 @@ class FFXModelFactory:
         alphas = sorted(set(alphas1).union(alphas2), reverse=True)
 
         if not 'precompute' in fit_params or fit_params['precompute'] is True:
-            fit_params['precompute'] = numpy.dot(X_unbiased.T, X_unbiased)
-            #if not 'Xy' in fit_params or fit_params['Xy'] is None:
-            #    fit_params['Xy'] = numpy.dot(X_unbiased.T, y_unbiased)
+            precompute = numpy.dot(X_unbiased.T, X_unbiased)
+            if not 'Xy' in fit_params or fit_params['Xy'] is None:
+                fit_params['Xy'] = numpy.dot(X_unbiased.T, y_unbiased)
 
         models = [] #build this up
-        nmses = [] #for detecting stagnation
+        nmses  = [] #for detecting stagnation
         cur_unbiased_coefs = None # init values for coefs
         start_time = time.time()
         for (alpha_i, alpha) in enumerate(alphas):
             #compute (unbiased) coefficients. Recall that mean=0 so no intercept needed
-            clf = ElasticNetWithTimeout(alpha=alpha, rho=ss.rho(), fit_intercept=False)
+            clf = ElasticNetWithTimeout(alpha=alpha, rho=ss.rho(), fit_intercept=False, \
+                                        precompute=precompute, max_iter=max_iter)
             try:
-                clf.fit(X_unbiased, y_unbiased, coef_init=cur_unbiased_coefs, 
-                        max_iter=max_iter, **fit_params)
+                clf.fit(X_unbiased, y_unbiased, coef_init=cur_unbiased_coefs, **fit_params)
             except TimeoutError:
                 print '    Regularized update failed. Returning None'
                 return None #failure
@@ -529,7 +523,7 @@ class FFXModelFactory:
 
             #compute model; update models
             #  -"rebias" means convert from (mean=0, stddev=1) to original (mean, stddev)
-            coefs = self._rebiasCoefs([0.0] + list(cur_unbiased_coefs), X_stds, X_avgs, y_std, y_avg)
+            coefs = self._rebiasCoefs(cur_unbiased_coefs, X_stds, X_avgs, y_std, y_avg)
             (coefs_n, bases_n, coefs_d, bases_d) = self._allocateToNumerDenom(ss, bases, coefs)
             model = FFXModel(coefs_n, bases_n, coefs_d, bases_d, varnames)
             models.append(model)
@@ -566,6 +560,7 @@ class FFXModelFactory:
             print '    Pathwise learn: done'
         return models
 
+
     def _allocateToNumerDenom(self, ss, bases, coefs):
         """Prune out nonzero coefficients/bases.  Allocate to numerator vs. denominator."""
         if ss.includeDenominator():
@@ -585,34 +580,18 @@ class FFXModelFactory:
 
         return (coefs_n, bases_n, coefs_d, bases_d)
 
-    def _unbiasedXy(self, Xin, yin):
-        """Make all input rows of X, and y, to have mean=0 stddev=1 """ 
-        #unbiased X
-        X_avgs, X_stds = Xin.mean(0), Xin.std(0)
-        X_unbiased = (Xin - X_avgs) / X_stds
-        
-        #unbiased y
-        y_avg, y_std = yin.mean(0), yin.std(0)
-        y_unbiased = (yin - y_avg) / y_std
-        
-        return (X_unbiased, y_unbiased, X_avgs, X_stds, y_avg, y_std)
 
     def _rebiasCoefs(self, unbiased_coefs, X_stds, X_avgs, y_std, y_avg):
         """Given the coefficients that were learned using unbiased training data, rebias the
         coefficients so that they are at the scale of the real training X and y."""
         #preconditions
         assert unbiased_coefs is not None
-        assert len(unbiased_coefs) == (len(X_stds)+1) == (len(X_avgs)+1), \
-            (len(unbiased_coefs), (len(X_stds)+1), (len(X_avgs)+1))
+        assert len(unbiased_coefs) == len(X_stds) == len(X_avgs), \
+              (len(unbiased_coefs),   len(X_stds),   len(X_avgs))
 
-        #main work
-        n = len(X_stds)
-        coefs = numpy.zeros(n+1, dtype=float)
-        coefs[0] = unbiased_coefs[0] * y_std + y_avg
-        for j in range(1,n+1):
-            coefs[j] = unbiased_coefs[j] * y_std / X_stds[j-1]
-            coefs[0] -= coefs[j] * X_avgs[j-1]
-        return coefs
+        coefs          = ((unbiased_coefs * y_std) / X_stds)
+        coef_intercept = y_avg - numpy.sum(coefs * X_avgs)
+        return scipy.r_[coef_intercept, coefs]
 
 
 class ElasticNetWithTimeout(ElasticNet):

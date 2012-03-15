@@ -1,25 +1,14 @@
+#cython: nonecheck=False
+#cython: boundscheck=False
+#cython: wraparound=False
+
 # Moving things to Cython
 import numpy, scipy
 cimport numpy
 cimport cython
 
-cdef extern from "numpy/arrayobject.h":
-    ctypedef int intp
-    ctypedef extern class numpy.ndarray [object PyArrayObject]:
-        cdef char *data
-        cdef int nd
-        cdef intp *dimensions
-        cdef intp *strides
-        cdef int flags
-
-
-cdef extern from "math.h":
-    bint isnan(double x)
-
-cpdef yIsPoor(y):
-    """Returns True if y is not usable"""
-    return max(scipy.isinf(y)) or max(scipy.isnan(y))
-
+#========================================================================================
+#string functions
 
 cpdef coefStr(double x):
     """Gracefully print a number to 3 significant digits.  See _testCoefStr in unit tests"""
@@ -42,7 +31,42 @@ cpdef basesStr(bases):
 
 #========================================================================================
 #utility classes / functions
-def nondominatedIndices2d(cost0s, cost1s):
+cdef extern from "math.h":
+    bint isnan(double x)
+
+cpdef yIsPoor(y):
+    """Returns True if y is not usable"""
+    return max(scipy.isinf(y)) or max(scipy.isnan(y))
+
+
+# cpdef getParetoFront2d(numpy.ndarray[double, ndim=1]cost0s, 
+#                        numpy.ndarray[int, ndim=1] cost1s):
+#     """Extracts the 2D Pareto-optimal front from a 2D numpy array.
+    
+#     Parameters
+#     ----------
+#     data : numpy ndarray, or pandas.DataFrame
+#         Data for which we want pareto-optimal front.
+    
+#     Examples
+#     --------
+#     p = getParetoFront(data)
+    
+#     """
+#     cdef numpy.ndarray[int, ndim=1] mask = numpy.zeros(cost0s.shape[0], dtype=numpy.int32)
+
+#     for i in range(cost0s.shape[0]):
+#         for j in range(cost0s.shape[0]):
+#             if i == j:
+#                 continue
+#             if cost0s[i] >= cost0s[j] and cost1s[i] >= cost1s[j]:
+#                 mask[i] = 0
+#     print mask
+#     return numpy.nonzero(mask)[0]
+
+
+@cython.wraparound(True)
+cpdef nondominatedIndices2d(cost0s, cost1s):
     """
     @description
         Find indices of individuals that are on the nondominated 2-d tradeoff.
@@ -55,13 +79,13 @@ def nondominatedIndices2d(cost0s, cost1s):
       nondomI -- list of int -- nondominated indices; each is in range [0, #inds - 1]
                 ALWAYS returns at least one entry if there is valid data        
     """ 
-    cost0s, cost1s = numpy.asarray(cost0s), numpy.asarray(cost1s)
+    #cost0s, cost1s = numpy.asarray(cost0s), numpy.asarray(cost1s)
     n_points = len(cost0s)
     assert n_points == len(cost1s)   
 
     if n_points == 0: #corner case
         return []
-    
+
     #indices of cost0s sorted for ascending order  
     I = numpy.argsort(cost0s)
 
@@ -105,8 +129,7 @@ def nondominatedIndices2d(cost0s, cost1s):
 
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
+
 cpdef double nmse(numpy.ndarray[double, ndim=1] yhat, 
                   numpy.ndarray[double, ndim=1] y,
                   double min_y, 
@@ -148,4 +171,16 @@ cpdef double nmse(numpy.ndarray[double, ndim=1] yhat,
 
 
 
+cpdef unbiasedXy(numpy.ndarray[double, ndim=2] Xin, 
+                 numpy.ndarray[double, ndim=1] yin):
 
+    """Make all input rows of X, and y, to have mean=0 stddev=1 """ 
+    #unbiased X
+    X_avgs, X_stds = Xin.mean(0), Xin.std(0)
+    X_unbiased = (Xin - X_avgs) / X_stds
+    
+    #unbiased y
+    y_avg, y_std = yin.mean(0), yin.std(0)
+    y_unbiased = (yin - y_avg) / y_std
+    
+    return (X_unbiased, y_unbiased, X_avgs, X_stds, y_avg, y_std)
