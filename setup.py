@@ -1,5 +1,12 @@
 import os
-from setuptools import setup
+from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
+import numpy as np
+
+ext_modules = [Extension("core_utils", ["ffx/core_utils.pyx"]),
+               Extension("bases", ["ffx/bases.pyx"])]
+
 setup(
     name = "ffx",
     version = "1.3.3",
@@ -13,6 +20,9 @@ setup(
     url = "https://github.com/natekupp/ffx",
     packages=['ffx', 'ffx/example-datasets', 'tests'],
     scripts=['ffx/bin/runffx'],
+    cmdclass = {'build_ext': build_ext},
+    include_dirs = [np.get_include()],
+    ext_modules = ext_modules,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",

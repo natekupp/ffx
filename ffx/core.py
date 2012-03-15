@@ -3,22 +3,9 @@ This module implements the Fast Function Extraction (FFX) algorithm.
 
 Reference: Trent McConaghy, FFX: Fast, Scalable, Deterministic Symbolic Regression Technology, Genetic Programming Theory and Practice IX, Edited by R. Riolo, E. Vladislavleva, and J. Moore, Springer, 2011.  http://www.trent.st/ffx
 
-
-HOW TO USE THIS MODULE:
-
-Easiest to use by calling runffx.py.  Its code has example usage patterns.
-
-The main routines are:
-  models = MultiFFXModelFactory().build(train_X, train_y, test_X, test_y, varnames)
-  yhat = model.simulate(X)
-  print model
-
 Can expand / restrict the set of functions via the user-changeable constants (right below licence).
-"""
 
-"""
 FFX Software Licence Agreement (like BSD, but adapted for non-commercial gain only)
-
 Copyright (c) 2011, Solido Design Automation Inc.  Authored by Trent McConaghy.
 All rights reserved.
 
@@ -41,6 +28,11 @@ CONSIDER_DENOM = True #consider denominator?
 CONSIDER_EXPON = True #consider exponents?
 CONSIDER_NONLIN = True #consider abs() and log()?
 CONSIDER_THRESH = True #consider hinge functions?
+MAX_TIME_REGULARIZE_UPDATE = 5 #maximum time (s) for regularization update during pathwise learn.
+
+#GTH = Greater-Than Hinge function, LTH = Less-Than Hinge function
+OP_ABS, OP_MAX0, OP_MIN0, OP_LOG10, OP_GTH, OP_LTH = 1, 2, 3, 4, 5, 6
+
 
 #======================================================================================
 import copy, itertools, math, signal, time, types
@@ -50,6 +42,8 @@ import numpy
 import scipy
 from scikits.learn.linear_model.coordinate_descent import ElasticNet
 
+from core_utils import *
+from bases import *
 
 # Make dependency on pandas optional.
 try:
@@ -57,11 +51,6 @@ try:
 except ImportError:
     pandas = None
 
-INF = float('Inf')
-MAX_TIME_REGULARIZE_UPDATE = 5 #maximum time (s) for regularization update during pathwise learn.
-
-#GTH = Greater-Than Hinge function, LTH = Less-Than Hinge function
-OP_ABS, OP_MAX0, OP_MIN0, OP_LOG10, OP_GTH, OP_LTH = 1, 2, 3, 4, 5, 6
 
 def _approachStr(approach):
     assert len(approach) == 5
@@ -235,141 +224,6 @@ class FFXModel:
 
         return s
 
-class SimpleBase:
-    """e.g. x4^2"""
-    def __init__(self, var, exponent):
-        self.var = var
-        self.exponent = exponent
-
-    def simulate(self, X):
-        """
-        @arguments
-          X -- 2d array of [sample_i][var_i] : float
-        @return
-          y -- 1d array of [sample_i] : float
-        """
-        return X[:,self.var] ** self.exponent
-
-    def __str__(self):
-        if self.exponent == 1:
-            return 'x%d' % self.var
-        else:
-            return 'x%d^%g' % (self.var, self.exponent)
-                                
-class OperatorBase:
-    """e.g. log(x4^2)"""
-    def __init__(self, simple_base, nonlin_op, thr=INF):
-        """
-        @arguments
-          simple_base -- SimpleBase
-          nonlin_op -- one of OPS
-          thr -- None or float -- depends on nonlin_op
-        """
-        self.simple_base = simple_base
-        self.nonlin_op = nonlin_op
-        self.thr = thr
-
-    def simulate(self, X):
-        """
-        @arguments
-          X -- 2d array of [sample_i][var_i] : float
-        @return
-          y -- 1d array of [sample_i] : float
-        """
-        op = self.nonlin_op
-        ok = True
-        y_lin = self.simple_base.simulate(X)
-
-        if op == OP_ABS:     ya = numpy.abs(y_lin)
-        elif op == OP_MAX0:  ya = numpy.clip(y_lin, 0.0, INF)
-        elif op == OP_MIN0:  ya = numpy.clip(y_lin, -INF, 0.0)
-        elif op == OP_LOG10:
-            #safeguard against: log() on values <= 0.0
-            mn, mx = min(y_lin), max(y_lin)
-            if mn <= 0.0 or scipy.isnan(mn) or mx == INF or scipy.isnan(mx):
-                ok = False
-            else:
-                ya = numpy.log10(y_lin)
-        elif op == OP_GTH:   ya = numpy.clip(self.thr - y_lin, 0.0, INF)
-        elif op == OP_LTH:   ya = numpy.clip(y_lin - self.thr, 0.0, INF)
-        else:                raise 'Unknown op %d' % op
-
-        if ok: #could always do ** exp, but faster ways if exp is 0,1
-            y = ya
-        else:
-            y = INF * numpy.ones(X.shape[0], dtype=float)    
-        return y
-    
-    def __str__(self):
-        op = self.nonlin_op
-        simple_s = str(self.simple_base)
-        if op == OP_ABS:     return 'abs(%s)' % simple_s
-        elif op == OP_MAX0:  return 'max(0, %s)' % simple_s
-        elif op == OP_MIN0:  return 'min(0, %s)' % simple_s
-        elif op == OP_LOG10: return 'log10(%s)' % simple_s
-        elif op == OP_GTH:   return ('max(0,%s-%s)' % (simple_s, coefStr(self.thr))).replace('--','+')
-        elif op == OP_LTH:   return 'max(0,%s-%s)' % (coefStr(self.thr), simple_s)
-        else:                raise 'Unknown op %d' % op
-
-class ProductBase:
-    """e.g. x2^2 * log(x1^3)"""
-    def __init__(self, base1, base2):
-        self.base1 = base1
-        self.base2 = base2
-
-    def simulate(self, X):
-        """
-        @arguments
-          X -- 2d array of [sample_i][var_i] : float
-        @return
-          y -- 1d array of [sample_i] : float
-        """
-        yhat1 = self.base1.simulate(X)
-        yhat2 = self.base2.simulate(X)
-        return yhat1 * yhat2
-
-    def __str__(self):
-        return '%s * %s' % (self.base1, self.base2)
-
-class ConstantModel:
-    """e.g. 3.2"""
-    def __init__(self, constant, numvars):
-        """
-        @description        
-            Constructor.
-    
-        @arguments        
-            constant -- float -- constant value returned by this model
-            numvars -- int -- number of input variables to this model
-        """ 
-        self.constant = float(constant) 
-        self.numvars = numvars
-
-    def numBases(self):
-        """Return total number of bases"""
-        return 0
-
-    def simulate(self, X):
-        """
-        @arguments
-          X -- 2d array of [sample_i][var_i] : float
-        @return
-          y -- 1d array of [sample_i] : float
-        """
-        N = X.shape[0]
-        if scipy.isnan(self.constant): #corner case
-            yhat = numpy.array([INF] * N)
-        else: #typical case
-            yhat = numpy.ones(N, dtype=float) * self.constant  
-        return yhat
-    
-    def __str__(self):
-        return self.str2()
-
-    def str2(self, dummy_arg=None):
-        return coefStr(self.constant)
-
-
 
 #==============================================================================
 #Model factories
@@ -392,7 +246,7 @@ class MultiFFXModelFactory:
         @return
           models -- list of FFXModel -- Pareto-optimal set of models
         """
-        
+
         if pandas is not None and isinstance(train_X, pandas.DataFrame):
             varnames = train_X.columns
             train_X = train_X.as_matrix()
@@ -460,6 +314,7 @@ class MultiFFXModelFactory:
                     print "num_bases=%d, test_nmse=%.6f, model=%s" % \
                         (model.numBases(), model.test_nmse, model.str2(500))
 
+                     
         #final pareto filter
         models = self._nondominatedModels(models)
 
@@ -550,8 +405,8 @@ class FFXModelFactory:
                         if nonlin_op == OP_MAX0 and min(lin_yhat) >= 0: continue 
                         if nonlin_op == OP_MIN0 and max(lin_yhat) <= 0: continue 
 
-                        nonsimple_base = OperatorBase(simple_base, nonlin_op, None)
-                        nonsimple_base.var = var_i #easy access when considering interactions
+                        nonsimple_base = OperatorBase(simple_base, nonlin_op, numpy.Inf)
+                        #nonsimple_base.var = var_i #easy access when considering interactions
 
                         nonlin_yhat = nonsimple_base.simulate(X)
                         if numpy.all(nonlin_yhat == lin_yhat): continue #op has no effect
@@ -568,7 +423,7 @@ class FFXModelFactory:
                         for threshold_op in ss.thresholdOps(): 
                             for thr in thrs:
                                 nonsimple_base = OperatorBase(simple_base, threshold_op, thr)
-                                nonsimple_base.var = var_i #easy access when considering interactions
+                                #nonsimple_base.var = var_i #easy access when considering interactions
                                 order1_bases.append(nonsimple_base)
         if verbose:
             print '  STEP 1A: Build order-1 bases: done.  Have %d order-1 bases.' % len(order1_bases)
@@ -852,126 +707,6 @@ class ElasticNetWithTimeout(ElasticNet):
     def fit(self, *args, **kwargs):
         return ElasticNet.fit(self, *args, **kwargs)
 
-#========================================================================================
-#utility classes / functions
-def nondominatedIndices2d(cost0s, cost1s):
-    """
-    @description
-        Find indices of individuals that are on the nondominated 2-d tradeoff.
-
-    @arguments
-      cost0s -- 1d array of float [model_i] -- want to minimize this.  E.g. complexity.
-      cost1s -- 1d array of float [model_i] -- want to minimize this too.  E.g. nmse.
-
-    @return
-      nondomI -- list of int -- nondominated indices; each is in range [0, #inds - 1]
-                ALWAYS returns at least one entry if there is valid data        
-    """ 
-    cost0s, cost1s = numpy.asarray(cost0s), numpy.asarray(cost1s)
-    n_points = len(cost0s)
-    assert n_points == len(cost1s)   
-
-    if n_points == 0: #corner case
-        return []
-    
-    #indices of cost0s sorted for ascending order  
-    I = numpy.argsort(cost0s)
-
-    #'cur' == best at this cost0s
-    best_cost = [cost0s[I[0]], cost1s[I[0]]]
-    best_cost_index = I[0]
-
-    nondom_locs = []
-    for i in xrange(n_points):
-        loc = I[i] # traverse cost0s in ascending order
-        if cost0s[loc] == best_cost[0]:
-            if cost1s[loc] < best_cost[1]:
-                best_cost_index = loc
-                best_cost = [cost0s[loc], cost1s[loc]]
-        else:   # cost0s[loc] > best_cost[0] because 
-                # loc indexes cost0s in ascending order
-            if not nondom_locs:
-                # initial value
-                nondom_locs = [best_cost_index]
-            elif best_cost[1] < cost1s[nondom_locs[-1]]:
-                # if the current cost is lower than the last item
-                # on the non-dominated list, add it's index to 
-                # the non-dominated list
-                nondom_locs.append(best_cost_index)
-            # set up "last tested value"
-            best_cost_index = loc
-            best_cost = [cost0s[loc], cost1s[loc]]
-
-    if not nondom_locs:
-        # if none are non-dominated, return the last one
-        nondom_locs = [loc]
-    elif best_cost[1] < cost1s[nondom_locs[-1]]:
-        # if the current cost is lower than the last item
-        # on the non-dominated list, add it's index to 
-        # the non-dominated list
-        nondom_locs.append(best_cost_index)
-
-    # return the non-dominated in sorted order
-    nondomI = sorted(nondom_locs)
-    return nondomI
-
-def nmse(yhat, y, min_y, max_y):
-    """
-    @description
-        Calculates the normalized mean-squared error. 
-
-    @arguments
-        yhat -- 1d array or list of floats -- estimated values of y
-        y -- 1d array or list of floats -- true values
-        min_y, max_y -- float, float -- roughly the min and max; they
-          do not have to be the perfect values of min and max, because
-          they're just here to scale the output into a roughly [0,1] range
-
-    @return
-        nmse -- float -- normalized mean-squared error
-    """
-    #base case: no entries
-    if len(yhat) == 0:
-        return 0.0
-
-    #base case: both yhat and y are constant, and same values
-    if (max_y == min_y) and (max(yhat) == min(yhat) == max(y) == min(y)):
-        return 0.0
-
-    #main case
-    assert max_y > min_y, 'max_y=%g was not > min_y=%g' % (max_y, min_y)
-    yhat_a, y_a = numpy.asarray(yhat), numpy.asarray(y)
-    y_range = float(max_y - min_y)
-    try:
-        result = math.sqrt(numpy.mean(((yhat_a - y_a) / y_range) ** 2))
-        if scipy.isnan(result):
-            return INF
-        return result
-    except:
-        return INF
-
-def yIsPoor(y):
-    """Returns True if y is not usable"""
-    return max(scipy.isinf(y)) or max(scipy.isnan(y))
 
 
-def coefStr(x):
-    """Gracefully print a number to 3 significant digits.  See _testCoefStr in unit tests"""
-    if x == 0.0:        s = '0'
-    elif numpy.abs(x) < 1e-4: s = ('%.2e' % x).replace('e-0', 'e-')
-    elif numpy.abs(x) < 1e-3: s = '%.6f' % x
-    elif numpy.abs(x) < 1e-2: s = '%.5f' % x
-    elif numpy.abs(x) < 1e-1: s = '%.4f' % x
-    elif numpy.abs(x) < 1e0:  s = '%.3f' % x
-    elif numpy.abs(x) < 1e1:  s = '%.2f' % x
-    elif numpy.abs(x) < 1e2:  s = '%.1f' % x
-    elif numpy.abs(x) < 1e4:  s = '%.0f' % x
-    else:               s = ('%.2e' % x).replace('e+0', 'e')
-    return s
 
-def basesStr(bases):
-    """Pretty print list of bases"""
-    return ', '.join([str(base) for base in bases])
-
-def rail(x, minx, maxx):
-    return max(minx, max(maxx, x))
