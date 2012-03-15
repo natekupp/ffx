@@ -1,6 +1,9 @@
-import numpy, scipy
+#cython: nonecheck=False
+#cython: boundscheck=False
+#cython: wraparound=False
+
+import numpy
 cimport numpy
-cimport cython
 
 #GTH = Greater-Than Hinge function, LTH = Less-Than Hinge function
 cdef enum BasisFunc:
@@ -11,10 +14,8 @@ cdef enum BasisFunc:
     OP_GTH = 5
     OP_LTH = 6
 
-
 cdef extern from "math.h":
     bint isnan(double x)
-
 
 cpdef coefStr(double x):
     """Gracefully print a number to 3 significant digits.  See _testCoefStr in unit tests"""
@@ -31,6 +32,87 @@ cpdef coefStr(double x):
     return s
 
 
+
+#========================================================================================
+#strategy 
+cdef class FFXBuildStrategy:
+    """All parameter settings.  Put magic numbers here."""
+    
+    cdef int num_alphas
+    cdef approach
+
+    cdef public double final_target_train_nmse
+    cdef public double final_max_num_bases
+    cdef double _rho
+    cdef double _eps
+
+    cdef public int num_thrs_per_var
+    cdef public all_nonlin_ops
+    cdef public all_threshold_ops
+    cdef public all_expr_exponents
+
+    def __cinit__(self, numpy.ndarray[int, ndim=1] approach):
+        """
+        @arguments
+          approach -- 5-d integer ndarray of [use_inter, use_denom, use_expon, use_nonlin, use_thresh]
+        """
+        self.num_alphas = 1000
+
+        assert len(approach) == 5
+        assert numpy.max(approach) <= 1 and \
+               numpy.min(approach) >= 0
+        self.approach = approach 
+        
+        #final round will stop if either of these is hit
+        self.final_target_train_nmse = 0.01 #0.01 = 1%
+        self.final_max_num_bases = 250 #
+
+        self._rho = 0.95 #aggressive pruning (note: lasso has rho=1.0, ridge regression has rho=0.0)
+        
+        #  eps -- Length of the path. eps=1e-3 means that alpha_min / alpha_max = 1e-3.
+        self._eps = 1e-70
+
+        #will use all if 'nonlin1', else []
+        self.all_nonlin_ops = [OP_ABS, OP_LOG10] 
+
+        #will use all if 'thresh1', else []
+        self.all_threshold_ops = [OP_GTH, OP_LTH] 
+        self.num_thrs_per_var = 5
+
+        #will use all if 'expon1', else [1.0]
+        self.all_expr_exponents = [-1.0, -0.5, +0.5, +1.0]
+
+    def includeInteractions(self):
+        return bool(self.approach[0])
+
+    def includeDenominator(self):
+        return bool(self.approach[1])
+
+    def exprExponents(self):
+        if self.approach[2]: return self.all_expr_exponents
+        else:                return [1.0]
+
+    def nonlinOps(self):
+        if self.approach[3]: return self.all_nonlin_ops
+        else:                return []
+
+    def thresholdOps(self):
+        if self.approach[4]: return self.all_threshold_ops
+        else:                return []
+
+    def eps(self):
+        return self._eps
+
+    def rho(self):
+        return self._rho
+
+    def numAlphas(self):
+        return self.num_alphas
+
+
+
+#========================================================================================
+# bases 
 cdef class SimpleBase:
     """e.g. x4^2"""
 

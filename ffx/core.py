@@ -31,19 +31,20 @@ CONSIDER_THRESH = True #consider hinge functions?
 MAX_TIME_REGULARIZE_UPDATE = 5 #maximum time (s) for regularization update during pathwise learn.
 
 #GTH = Greater-Than Hinge function, LTH = Less-Than Hinge function
-OP_ABS, OP_MAX0, OP_MIN0, OP_LOG10, OP_GTH, OP_LTH = 1, 2, 3, 4, 5, 6
+OP_ABS, OP_MAX0, OP_MIN0, OP_LOG10, OP_GTH, OP_LTH = range(1,7)
 
 
 #======================================================================================
-import copy, itertools, math, signal, time, types
+import copy, itertools, math, time, types
 
 #3rd party dependencies
 import numpy
 import scipy
 from scikits.learn.linear_model.coordinate_descent import ElasticNet
 
+from timeout    import *
 from core_utils import *
-from bases import *
+from bases      import *
 
 # Make dependency on pandas optional.
 try:
@@ -58,67 +59,6 @@ def _approachStr(approach):
     return 'inter%d denom%d expon%d nonlin%d thresh%d' % \
         (approach[0], approach[1], approach[2], approach[3], approach[4])
 
-#========================================================================================
-#strategy 
-class FFXBuildStrategy(object):
-    """All parameter settings.  Put magic numbers here."""
-    
-    def __init__(self, approach):
-        """
-        @arguments
-          approach -- 5-d list of [use_inter, use_denom, use_expon, use_nonlin, use_thresh]
-        """
-        assert len(approach) == 5
-        assert set(approach).issubset([0,1])
-        self.approach = approach 
-        
-        self.num_alphas = 1000
-
-        #final round will stop if either of these is hit
-        self.final_target_train_nmse = 0.01 #0.01 = 1%
-        self.final_max_num_bases = 250 #
-
-        self._rho = 0.95 #aggressive pruning (note: lasso has rho=1.0, ridge regression has rho=0.0)
-        
-        #  eps -- Length of the path. eps=1e-3 means that alpha_min / alpha_max = 1e-3.
-        self._eps = 1e-70
-
-        #will use all if 'nonlin1', else []
-        self.all_nonlin_ops = [OP_ABS, OP_LOG10] 
-
-        #will use all if 'thresh1', else []
-        self.all_threshold_ops = [OP_GTH, OP_LTH] 
-        self.num_thrs_per_var = 5
-
-        #will use all if 'expon1', else [1.0]
-        self.all_expr_exponents = [-1.0, -0.5, +0.5, +1.0]
-
-    def includeInteractions(self):
-        return bool(self.approach[0])
-
-    def includeDenominator(self):
-        return bool(self.approach[1])
-
-    def exprExponents(self):
-        if self.approach[2]: return self.all_expr_exponents
-        else:                return [1.0]
-
-    def nonlinOps(self):
-        if self.approach[3]: return self.all_nonlin_ops
-        else:                return []
-
-    def thresholdOps(self):
-        if self.approach[4]: return self.all_threshold_ops
-        else:                return []
-
-    def eps(self):
-        return self._eps
-
-    def rho(self):
-        return self._rho
-
-    def numAlphas(self):
-        return self.num_alphas
 
 #========================================================================================
 #models / bases
@@ -281,7 +221,7 @@ class MultiFFXModelFactory:
                         if nonlin==1 and not CONSIDER_NONLIN: continue
                         for thresh in [0,1]:
                             if thresh==1 and not CONSIDER_THRESH: continue
-                            approach = [inter, denom, expon, nonlin, thresh]
+                            approach = numpy.array([inter, denom, expon, nonlin, thresh], dtype=numpy.int32)
                             if sum(approach) >= 4: continue #not too many features at once
                             approaches.append(approach)
                             if verbose:
@@ -674,33 +614,6 @@ class FFXModelFactory:
             coefs[0] -= coefs[j] * X_avgs[j-1]
         return coefs
 
-
-#========================================================================================
-#Revise linear_model.coordinate_descent.ElasticNet.fit() to handle when it hangs
-#http://www.saltycrane.com/blog/2010/04/using-python-timeout-decorator-uploading-s3/
-
-class TimeoutError(Exception):
-    def __init__(self, value = "Timed Out"):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-def timeout(seconds_before_timeout):
-    def decorate(f):
-        def handler(signum, frame):
-            raise TimeoutError()
-        def new_f(*args, **kwargs):
-            old = signal.signal(signal.SIGALRM, handler)
-            signal.alarm(seconds_before_timeout)
-            try:
-                result = f(*args, **kwargs)
-            finally:
-                signal.signal(signal.SIGALRM, old)
-            signal.alarm(0)
-            return result
-        new_f.func_name = f.func_name
-        return new_f
-    return decorate
 
 class ElasticNetWithTimeout(ElasticNet):
     @timeout(MAX_TIME_REGULARIZE_UPDATE) #if this freezes, then exit with a TimeoutError
