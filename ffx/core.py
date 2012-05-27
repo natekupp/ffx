@@ -384,7 +384,7 @@ class MultiFFXModelFactory:
 
         @argument
           train_X -- 2d array of [sample_i][var_i] : float -- training inputs 
-          test_y -- 1d array of [sample_i] : float -- training outputs
+          train_y -- 1d array of [sample_i] : float -- training outputs
           test_X -- 2d array -- testing inputs
           test_y -- 1d array -- testing outputs
           varnames -- list of string -- variable names
