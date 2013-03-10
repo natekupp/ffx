@@ -2,7 +2,7 @@ import os
 from setuptools import setup
 setup(
     name = "ffx",
-    version = "1.3.3",
+    version = "1.3.4",
     author = "Trent McConaghy",
     author_email = "gtrent@gmail.com",
     maintainer = "Nate Kupp",
@@ -11,7 +11,7 @@ setup(
     license = "See readme",
     keywords = "symbolic regression machine learning",
     url = "https://github.com/natekupp/ffx",
-    packages=['ffx', 'ffx/example-datasets', 'tests'],
+    packages=['ffx', 'tests'],
     scripts=['ffx/bin/runffx'],
     classifiers=[
         "Development Status :: 4 - Beta",

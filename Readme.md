@@ -18,18 +18,26 @@ __Standalone__
 
 	runffx test train_X.csv train_y.csv test_X.csv test_y.csv
 
-You can run `runffx help` for more information on using the command-line utility.
+Use `runffx help` for more information on using the command-line utility.
 
 __Python Module__
 
-The following snippet demonstrates how to use FFX within your existing Python code. Note that all arguments are expected to be of type `numpy.ndarray` or `pandas.DataFrame`.
+The following snippet is a simple example of how to use FFX. Note that all arguments are expected to be of type `numpy.ndarray` or `pandas.DataFrame`.
 
+	import numpy as np
 	import ffx
-	models = ffx.run(train_X, train_y, test_X, test_y, varnames)
+	
+	train_X = np.array( [ (1.5,2,3), (4,5,6) ] ).T
+	train_y = np.array( [1,2,3])
+	
+	test_X = np.array( [ (5.241,1.23, 3.125), (1.1,0.124,0.391) ] ).T
+	test_y = np.array( [3.03,0.9113,1.823])
+	
+	models = ffx.run(train_X, train_y, test_X, test_y, ["predictor_a", "predictor_b"])
 	for model in models:
-		yhat = model.simulate(X)
-		print model
-
+	    yhat = model.simulate(test_X)
+	    print model
+	
 Presently, the FFX Python module only exposes a single API method, `ffx.run()`.
 
 
@@ -39,17 +47,6 @@ Presently, the FFX Python module only exposes a single API method, `ffx.run()`.
 * scipy (0.9.0+) 
 * scikits.learn (0.8+)
 * pandas (optional, enables support for labeled `pandas.DataFrame` datasets)
-
-
-## Real-world test datasets:
-Datasets are included as .tar.gz files under the `ffx/example-datasets/` folder.
-
-* 6 Medium-dim. problems 
-	- [All 36K] - `med-dimensional_benchmark_datasets.tar.gz`
-* 12 High-dim. problems 
-	- [Part1 17M] - `high-dimensional_benchmark_datasets_part1.tar.gz`
-	- [Part2 14M] - `high-dimensional_benchmark_datasets_part2.tar.gz` 
-	- [Part3 14M] - `high-dimensional_benchmark_datasets_part3.tar.gz`
 
 
 ## Technical details
@@ -62,22 +59,3 @@ Datasets are included as .tar.gz files under the `ffx/example-datasets/` folder.
 1. McConaghy, FFX: Fast, Scalable, Deterministic Symbolic Regression Technology, _Genetic Programming Theory and Practice IX_, Edited by R. Riolo, E. Vladislavleva, and J. Moore, Springer, 2011.
 2. McConaghy, High-Dimensional Statistical Modeling and Analysis of Custom Integrated Circuits, _Proc. Custom Integrated Circuits Conference_, Sept. 2011
 
-
-## License
-FFX Software Licence Agreement (like BSD, but adapted for non-commercial gain only)
-
-Copyright (c) 2011, Solido Design Automation Inc.  Authored by Trent McConaghy.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-* Usage does not involve commercial gain. 
-* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-* Neither the name of the associated institutions nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
-For permissions beyond the scope of this license, please contact Trent McConaghy (trentmc@solidodesign.com).
-
-THIS SOFTWARE IS PROVIDED BY THE DEVELOPERS ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE DEVELOPERS OR THEIR INSTITUTIONS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
-
-Patent pending.
