@@ -730,8 +730,16 @@ class FFXModelFactory:
             except TimeoutError:
                 print '    Regularized update failed. Returning None'
                 return None #failure
-            cur_unbiased_coefs = clf.coef_.copy() 
-
+            cur_unbiased_coefs = clf.coef_.copy()
+            if cur_unbiased_coefs.shape == tuple():
+                # This happens when we have only one variable because
+                # ElasticNet calls np.squeeze(), which reduces a
+                # single element array to a 0-d array. That would
+                # crash us below in list(cur_unbiased_coefs). We just
+                # undo the squeeze.
+                cur_unbiased_coefs = cur_unbiased_coefs.reshape((1,))
+                
+                  
             #compute model; update models
             #  -"rebias" means convert from (mean=0, stddev=1) to original (mean, stddev)
             coefs = self._rebiasCoefs([0.0] + list(cur_unbiased_coefs), X_stds, X_avgs, y_std, y_avg)
