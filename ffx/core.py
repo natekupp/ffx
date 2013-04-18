@@ -48,7 +48,7 @@ import copy, itertools, math, signal, time, types
 #3rd party dependencies
 import numpy
 import scipy
-from scikits.learn.linear_model.coordinate_descent import ElasticNet
+from sklearn.linear_model import ElasticNet
 
 
 # Make dependency on pandas optional.
@@ -89,7 +89,7 @@ class FFXBuildStrategy(object):
         self.final_target_train_nmse = 0.01 #0.01 = 1%
         self.final_max_num_bases = 250 #
 
-        self._rho = 0.95 #aggressive pruning (note: lasso has rho=1.0, ridge regression has rho=0.0)
+        self._l1_ratio = 0.95 #aggressive pruning (note: lasso has l1_ratio=1.0, ridge regression has l1_ratio=0.0)
         
         #  eps -- Length of the path. eps=1e-3 means that alpha_min / alpha_max = 1e-3.
         self._eps = 1e-70
@@ -125,8 +125,8 @@ class FFXBuildStrategy(object):
     def eps(self):
         return self._eps
 
-    def rho(self):
-        return self._rho
+    def l1_ratio(self):
+        return self._l1_ratio
 
     def numAlphas(self):
         return self.num_alphas
@@ -685,7 +685,7 @@ class FFXModelFactory:
                     
     def _pathwiseLearn(self, ss, varnames, bases, X_orig, X_orig_regress, y_orig,
                        max_num_bases, target_nmse, verbose=False, **fit_params):
-        """Adapted from enet_path() in scikits.learn.linear_model.
+        """Adapted from enet_path() in sklearn.linear_model.
         http://scikit-learn.sourceforge.net/modules/linear_model.html
         Compute Elastic-Net path with coordinate descent.  
         Returns list of model (or None if failure)."""
@@ -703,7 +703,7 @@ class FFXModelFactory:
         n_samples = X_unbiased.shape[0]
         vals = numpy.dot(X_unbiased.T, y_unbiased)
         vals = [val for val in vals if not scipy.isnan(val)]
-        if vals: alpha_max = numpy.abs(max(vals) / (n_samples * ss.rho()))
+        if vals: alpha_max = numpy.abs(max(vals) / (n_samples * ss.l1_ratio()))
         else:    alpha_max = 1.0 #backup: pick a value from the air
 
         #alphas = lotsa alphas at beginning, and usual rate for rest
@@ -723,10 +723,10 @@ class FFXModelFactory:
         start_time = time.time()
         for (alpha_i, alpha) in enumerate(alphas):
             #compute (unbiased) coefficients. Recall that mean=0 so no intercept needed
-            clf = ElasticNetWithTimeout(alpha=alpha, rho=ss.rho(), fit_intercept=False)
+            clf = ElasticNetWithTimeout(alpha=alpha, l1_ratio=ss.l1_ratio(), fit_intercept=False,
+                                        max_iter=max_iter, **fit_params)
             try:
-                clf.fit(X_unbiased, y_unbiased, coef_init=cur_unbiased_coefs, 
-                        max_iter=max_iter, **fit_params)
+                clf.fit(X_unbiased, y_unbiased, coef_init=cur_unbiased_coefs)
             except TimeoutError:
                 print '    Regularized update failed. Returning None'
                 return None #failure

@@ -45,7 +45,7 @@ Presently, the FFX Python module only exposes a single API method, `ffx.run()`.
 * python (tested on 2.5, 2.6, and 2.7)
 * numpy (1.6.0+)
 * scipy (0.9.0+) 
-* scikits.learn (0.8+)
+* scikit-learn (0.9+)
 * pandas (optional, enables support for labeled `pandas.DataFrame` datasets)
 
 
