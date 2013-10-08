@@ -307,8 +307,8 @@ class OperatorBase:
         elif op == OP_MAX0:  return 'max(0, %s)' % simple_s
         elif op == OP_MIN0:  return 'min(0, %s)' % simple_s
         elif op == OP_LOG10: return 'log10(%s)' % simple_s
-        elif op == OP_GTH:   return ('max(0,%s-%s)' % (simple_s, coefStr(self.thr))).replace('--','+')
-        elif op == OP_LTH:   return 'max(0,%s-%s)' % (coefStr(self.thr), simple_s)
+        elif op == OP_GTH:   return 'max(0,%s-%s)' % (coefStr(self.thr), simple_s)
+        elif op == OP_LTH:   return ('max(0,%s-%s)' % (simple_s, coefStr(self.thr))).replace('--','+')
         else:                raise 'Unknown op %d' % op
 
 class ProductBase:
