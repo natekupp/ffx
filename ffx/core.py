@@ -726,7 +726,7 @@ class FFXModelFactory:
             clf = ElasticNetWithTimeout(alpha=alpha, l1_ratio=ss.l1_ratio(), fit_intercept=False,
                                         max_iter=max_iter, **fit_params)
             try:
-                clf.fit(X_unbiased, y_unbiased, coef_init=cur_unbiased_coefs)
+                clf.fit(X_unbiased, y_unbiased)
             except TimeoutError:
                 print '    Regularized update failed. Returning None'
                 return None #failure
