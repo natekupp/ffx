@@ -43,7 +43,7 @@ CONSIDER_NONLIN = True #consider abs() and log()?
 CONSIDER_THRESH = True #consider hinge functions?
 
 #======================================================================================
-import copy, itertools, math, signal, time, types
+import copy, itertools, math, signal, time, types, sys
 
 #3rd party dependencies
 import numpy
@@ -730,10 +730,18 @@ class FFXModelFactory:
             except TimeoutError:
                 print '    Regularized update failed. Returning None'
                 return None #failure
+            except ValueError:
+                print '    Regularized update failed with ValueError.'
+                print '    X_unbiased:'
+                print X_unbiased
+                print '    y_unbiased:'
+                print y_unbiased
+                sys.exit(1)
+
             cur_unbiased_coefs = clf.coef_.copy()
             if cur_unbiased_coefs.shape == tuple():
                 # This happens when we have only one variable because
-                # ElasticNet calls np.squeeze(), which reduces a
+                # ElasticNet calls numpy.squeeze(), which reduces a
                 # single element array to a 0-d array. That would
                 # crash us below in list(cur_unbiased_coefs). We just
                 # undo the squeeze.
@@ -802,12 +810,23 @@ class FFXModelFactory:
         """Make all input rows of X, and y, to have mean=0 stddev=1 """ 
         #unbiased X
         X_avgs, X_stds = Xin.mean(0), Xin.std(0)
+        #if any stddev was 0, overwrite with 1 to prevent divide by
+        #zero. Because we then return the overwritten value,
+        #_rebiasCoefs will end up with the right rebiased values. Same
+        #for y below.
+        numpy.copyto(X_stds, 1.0, where=~(X_stds > 0.0))
         X_unbiased = (Xin - X_avgs) / X_stds
         
         #unbiased y
         y_avg, y_std = yin.mean(0), yin.std(0)
+        #if stddev was 0, overwrite with 1
+        if not y_std > 0.0:
+            y_std = 1.0
         y_unbiased = (yin - y_avg) / y_std
-        
+      
+        assert numpy.all(numpy.isfinite(X_unbiased))
+        assert numpy.all(numpy.isfinite(y_unbiased))
+
         return (X_unbiased, y_unbiased, X_avgs, X_stds, y_avg, y_std)
 
     def _rebiasCoefs(self, unbiased_coefs, X_stds, X_avgs, y_std, y_avg):
