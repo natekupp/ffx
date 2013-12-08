@@ -405,8 +405,8 @@ class MultiFFXModelFactory:
             print 'Build(): begin. {2} variables, {1} training samples, {0} test samples'.format(test_X.shape[1], *train_X.shape)
         
         models = []
-        min_y = min(min(train_y), min(test_y))
-        max_y = max(max(train_y), max(test_y))
+        min_y = min(numpy.amin(train_y), numpy.amin(test_y))
+        max_y = max(numpy.amax(train_y), numpy.amax(test_y))
 
         #build all combinations of approaches, except for (a) features we don't consider
         # and (b) too many features at once
