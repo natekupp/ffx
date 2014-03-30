@@ -402,7 +402,7 @@ class MultiFFXModelFactory:
             raise Exception, 'varnames required for numpy.ndarray'
         
         if verbose:           
-            print 'Build(): begin. {2} variables, {1} training samples, {0} test samples'.format(test_X.shape[1], *train_X.shape)
+            print 'Build(): begin. {2} variables, {1} training samples, {0} test samples'.format(test_X.shape[0], *train_X.shape)
         
         models = []
         min_y = min(min(train_y), min(test_y))
