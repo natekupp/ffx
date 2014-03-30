@@ -617,8 +617,7 @@ class FFXModelFactory:
                 if basei.__class__ != SimpleBase: continue #just xi
                 if basei.exponent != 1.0: continue #just exponent==1
 
-                order2_exponent = 2
-                combined_base = SimpleBase(var_i, 2)
+                combined_base = SimpleBase(basei.var, 2)
                 order2_bases.append(combined_base)
 
                 tup = (id(basei), id(basei))
