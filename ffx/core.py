@@ -236,6 +236,22 @@ class FFXModel:
 
         return s
 
+    def complexity(self):
+        # Define complexity as the number of nodes needed in the
+        # corresponding GP tree.
+
+        # We have a leading constant, then for each base we have a
+        # coefficient, a multiply, and a plus, plus the complexity of
+        # the base itself.
+        num_complexity = 1 + sum(3 + b.complexity() for b in self.bases_n)
+        if self.bases_d:
+            denom_complexity = 1 + sum(2 + b.complexity() for b in self.bases_d)
+            # add 1 for the division
+            return num_complexity + 1 + denom_complexity
+        else:
+            return num_complexity
+    
+
 class SimpleBase:
     """e.g. x4^2"""
     def __init__(self, var, exponent):
@@ -256,6 +272,12 @@ class SimpleBase:
             return 'x%d' % self.var
         else:
             return 'x%d^%g' % (self.var, self.exponent)
+
+    def complexity(self):
+        if self.exponent == 1:
+            return 1
+        else:
+            return 3
                                 
 class OperatorBase:
     """e.g. log(x4^2)"""
@@ -312,6 +334,17 @@ class OperatorBase:
         elif op == OP_LTH:   return ('max(0,%s-%s)' % (simple_s, coefStr(self.thr))).replace('--','+')
         else:                raise 'Unknown op %d' % op
 
+    def complexity(self):
+        op = self.nonlin_op
+        if op == OP_ABS:     return 1 + self.simple_base.complexity()
+        elif op == OP_MAX0:  return 2 + self.simple_base.complexity()
+        elif op == OP_MIN0:  return 2 + self.simple_base.complexity()
+        elif op == OP_LOG10: return 1 + self.simple_base.complexity()
+        elif op == OP_GTH:   return 4 + self.simple_base.complexity()
+        elif op == OP_LTH:   return 4 + self.simple_base.complexity()
+        else:                raise 'Unknown op %d' % op
+
+
 class ProductBase:
     """e.g. x2^2 * log(x1^3)"""
     def __init__(self, base1, base2):
@@ -331,6 +364,9 @@ class ProductBase:
 
     def __str__(self):
         return '%s * %s' % (self.base1, self.base2)
+
+    def complexity(self):
+        return 1 + self.base1.complexity() + self.base2.complexity()
 
 class ConstantModel:
     """e.g. 3.2"""
@@ -370,6 +406,8 @@ class ConstantModel:
     def str2(self, dummy_arg=None):
         return coefStr(self.constant)
 
+    def complexity(self):
+        return 1
 
 
 #==============================================================================
