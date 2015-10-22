@@ -629,6 +629,10 @@ class FFXModelFactory:
             model = models[-1] #use most-explaining model (which also has the max num bases)
             order1_bases = model.bases_n + model.bases_d
 
+            if len(order1_bases) == 0: # the most-explaining model is a constant model
+                model = ConstantModel(y[0], 0)
+                return [model]
+
             #order bases by influence
             order1_infls = numpy.abs(list(model.coefs_n[1:]) + list(model.coefs_d)) #influences
             I = numpy.argsort(-1 * order1_infls)
