@@ -399,20 +399,13 @@ class OperatorBase:
 
     def complexity(self):
         op = self.nonlin_op
-        if op == OP_ABS:
-            return 1 + self.simple_base.complexity()
-        elif op == OP_MAX0:
-            return 2 + self.simple_base.complexity()
-        elif op == OP_MIN0:
-            return 2 + self.simple_base.complexity()
-        elif op == OP_LOG10:
-            return 1 + self.simple_base.complexity()
-        elif op == OP_GTH:
-            return 4 + self.simple_base.complexity()
-        elif op == OP_LTH:
-            return 4 + self.simple_base.complexity()
-        else:
-            raise 'Unknown op %d' % op
+        if op == OP_ABS:     return 1 + self.simple_base.complexity()
+        elif op == OP_MAX0:  return 2 + self.simple_base.complexity()
+        elif op == OP_MIN0:  return 2 + self.simple_base.complexity()
+        elif op == OP_LOG10: return 1 + self.simple_base.complexity()
+        elif op == OP_GTH:   return 4 + self.simple_base.complexity()
+        elif op == OP_LTH:   return 4 + self.simple_base.complexity()
+        else:                raise 'Unknown op %d' % op
 
 
 class ProductBase:
@@ -1164,27 +1157,19 @@ def yIsPoor(y):
 
 
 def coefStr(x):
-    """Gracefully print a number to 3 significant digits.  See _testCoefStr in unit tests"""
+    """Gracefully print a number to 3 significant digits.  See _testCoefStr in
+    unit tests"""
     if x == 0.0:
         s = '0'
-    elif numpy.abs(x) < 1e-4:
-        s = ('%.2e' % x).replace('e-0', 'e-')
-    elif numpy.abs(x) < 1e-3:
-        s = '%.6f' % x
-    elif numpy.abs(x) < 1e-2:
-        s = '%.5f' % x
-    elif numpy.abs(x) < 1e-1:
-        s = '%.4f' % x
-    elif numpy.abs(x) < 1e0:
-        s = '%.3f' % x
-    elif numpy.abs(x) < 1e1:
-        s = '%.2f' % x
-    elif numpy.abs(x) < 1e2:
-        s = '%.1f' % x
-    elif numpy.abs(x) < 1e4:
-        s = '%.0f' % x
-    else:
-        s = ('%.2e' % x).replace('e+0', 'e')
+    elif numpy.abs(x) < 1e-4: s = ('%.2e' % x).replace('e-0', 'e-')
+    elif numpy.abs(x) < 1e-3: s = '%.6f' % x
+    elif numpy.abs(x) < 1e-2: s = '%.5f' % x
+    elif numpy.abs(x) < 1e-1: s = '%.4f' % x
+    elif numpy.abs(x) < 1e0:  s = '%.3f' % x
+    elif numpy.abs(x) < 1e1:  s = '%.2f' % x
+    elif numpy.abs(x) < 1e2:  s = '%.1f' % x
+    elif numpy.abs(x) < 1e4:  s = '%.0f' % x
+    else:                     s = ('%.2e' % x).replace('e+0', 'e')
     return s
 
 
