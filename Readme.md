@@ -26,25 +26,25 @@ The following snippet is a simple example of how to use FFX. Note that all argum
 
 	import numpy as np
 	import ffx
-	
+
 	train_X = np.array( [ (1.5,2,3), (4,5,6) ] ).T
 	train_y = np.array( [1,2,3])
-	
+
 	test_X = np.array( [ (5.241,1.23, 3.125), (1.1,0.124,0.391) ] ).T
 	test_y = np.array( [3.03,0.9113,1.823])
-	
+
 	models = ffx.run(train_X, train_y, test_X, test_y, ["predictor_a", "predictor_b"])
 	for model in models:
 	    yhat = model.simulate(test_X)
 	    print model
-	
+
 Presently, the FFX Python module only exposes a single API method, `ffx.run()`.
 
 
 ## Dependencies
-* python (tested on 2.5, 2.6, and 2.7)
+* python (tested on 2.5, 2.6, 2.7, and 3.5)
 * numpy (1.6.0+)
-* scipy (0.9.0+) 
+* scipy (0.9.0+)
 * scikit-learn (0.9+)
 * pandas (optional, enables support for labeled `pandas.DataFrame` datasets)
 
@@ -58,4 +58,3 @@ Presently, the FFX Python module only exposes a single API method, `ffx.run()`.
 
 1. McConaghy, FFX: Fast, Scalable, Deterministic Symbolic Regression Technology, _Genetic Programming Theory and Practice IX_, Edited by R. Riolo, E. Vladislavleva, and J. Moore, Springer, 2011.
 2. McConaghy, High-Dimensional Statistical Modeling and Analysis of Custom Integrated Circuits, _Proc. Custom Integrated Circuits Conference_, Sept. 2011
-
