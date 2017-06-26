@@ -1,0 +1,40 @@
+language: python
+
+matrix:
+    fast_finish: true
+    include:
+        - os: linux
+          dist: trusty
+          sudo: required
+          python: 3.5
+          env: PYVERSION="3"
+        - os: linux
+          dist: trusty
+          sudo: required
+          python: 2.7
+          env: PYVERSION=""
+        - os: linux
+          dist: precise
+          sudo: required
+          python: 3.5
+          env: PYVERSION="3"
+        - os: linux
+          dist: precise
+          sudo: required
+          python: 2.7
+          env: PYVERSION=""
+
+install:
+#    - sudo apt-get update
+#    - sudo apt-get upgrade --yes
+    - pip${PYVERSION} install --upgrade pip setuptools wheel
+    - pip${PYVERSION} install coveralls codecov
+    - pip${PYVERSION} install --only-binary=numpy,scipy scipy
+    - pip${PYVERSION} install scikit-learn
+    - pip${PYVERSION} install git+https://github.com/natekupp/ffx
+
+script:
+  - python${PYVERSION}  tests/x_square_test.py
+
+after_success:
+  - coveralls
