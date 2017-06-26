@@ -1,5 +1,8 @@
 #FFX: Fast Function Extraction
 
+[![Build Status at Travis CI](https://travis-ci.org/natekupp/ffx.svg?branch=master)](https://travis-ci.org/natekupp/ffx)
+[![Coverage Status](https://coveralls.io/repos/github/natekupp/ffx/badge.svg?branch=master)](https://coveralls.io/github/natekupp/ffx?branch=master)
+
 FFX is a technique for symbolic regression. It is:
 
 - __Fast__ - runtime 5-60 seconds, depending on problem size (1GHz cpu)
