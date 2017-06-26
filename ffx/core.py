@@ -862,7 +862,7 @@ class FFXModelFactory:
         # alphas = lotsa alphas at beginning, and usual rate for rest
         st, fin = numpy.log10(alpha_max * ss.eps()), numpy.log10(alpha_max)
         alphas1 = numpy.logspace(
-            st, fin, num=ss.numAlphas() * 10)[::-1][:ss.numAlphas() / 4]
+            st, fin, num=ss.numAlphas() * 10)[::-1][:ss.numAlphas() // 4]
         alphas2 = numpy.logspace(st, fin, num=ss.numAlphas())
         alphas = sorted(set(alphas1).union(alphas2), reverse=True)
 
