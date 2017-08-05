@@ -39,7 +39,7 @@ The following snippet is a simple example of how to use FFX. Note that all argum
 	models = ffx.run(train_X, train_y, test_X, test_y, ["predictor_a", "predictor_b"])
 	for model in models:
 	    yhat = model.simulate(test_X)
-	    print model
+	    print(model)
 
 Presently, the FFX Python module only exposes a single API method, `ffx.run()`.
 
