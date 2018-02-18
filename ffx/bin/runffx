@@ -57,20 +57,20 @@ output is scalar.  Values in a given row are separated by spaces.
     #got the right number of args?  If not, output help
     num_args = len(args)
     if num_args != 2:
-        print help, '\nGot %d args, need 2.' % num_args; return
+        print(help, '\nGot %d args, need 2.' % num_args); return
     X_file, y_file = args[0], args[1]
     
     if not (X_file.endswith('.csv') or X_file.endswith('.txt')):
-        print "INPUTS_FILE file '%s' needs to end with .csv or .txt." % X_file
+        print("INPUTS_FILE file '%s' needs to end with .csv or .txt." % X_file)
         return
     if not os.path.exists(X_file):
-        print "INPUTS_FILE file '%s' does not exist.  Early exit." % X_file
+        print("INPUTS_FILE file '%s' does not exist.  Early exit." % X_file)
         return
     if not (y_file.endswith('.csv') or y_file.endswith('.txt')):
-        print "OUTPUTS_FILE file '%s' needs to end with .csv or .txt." % y_file
+        print("OUTPUTS_FILE file '%s' needs to end with .csv or .txt." % y_file)
         return
     if not os.path.exists(y_file):
-        print "OUTPUTS_FILE file '%s' does not exist.  Early exit." % y_file
+        print("OUTPUTS_FILE file '%s' does not exist.  Early exit." % y_file)
         return
 
     #create the target output filenames, and ensure they don't exist
@@ -81,9 +81,9 @@ output is scalar.  Values in a given row are separated by spaces.
     test_y_file  = join(y_file, 'test_')
     for newfile in [train_X_file, train_y_file, test_X_file, test_y_file]:
         if os.path.exists(newfile):
-            print "New file '%s' exists, and should not.  Early exit." % newfile; return
+            print("New file '%s' exists, and should not.  Early exit." % newfile); return
 
-    print "Begin runffx splitdata.  INPUTS_FILE.csv=%s, OUTPUTS_FILE.csv=%s" % (X_file, y_file)
+    print("Begin runffx splitdata.  INPUTS_FILE.csv=%s, OUTPUTS_FILE.csv=%s" % (X_file, y_file))
     
     #create X, y
     X = read(X_file, dim=2) #[sample_i][var_i] : float
@@ -104,7 +104,7 @@ output is scalar.  Values in a given row are separated by spaces.
     test_X  = numpy.take(X, test_I, 0)
     test_y  = numpy.take(y, test_I)
 
-    print "There will be %d samples in training data, and %d samples in test data" % (len(train_y), len(test_y))
+    print("There will be %d samples in training data, and %d samples in test data" % (len(train_y), len(test_y)))
 
     delimiter = ',' if X_file.endswith('.csv') else '\t'
     numpy.savetxt(train_X_file, train_X, delimiter=delimiter)
@@ -112,12 +112,12 @@ output is scalar.  Values in a given row are separated by spaces.
     numpy.savetxt(test_X_file, test_X, delimiter=delimiter)
     numpy.savetxt(test_y_file, test_y, delimiter=delimiter)
     
-    print "Created these files:"
-    print "  Training inputs:  %s" % train_X_file
-    print "  Training outputs: %s" % train_y_file
-    print "  Testing inputs:   %s" % test_X_file
-    print "  Testing outputs:  %s" % test_y_file
-    print "\nDone runffx splitdata."
+    print("Created these files:")
+    print("  Training inputs:  %s" % train_X_file)
+    print("  Training outputs: %s" % train_y_file)
+    print("  Testing inputs:   %s" % test_X_file)
+    print("  Testing outputs:  %s" % test_y_file)
+    print("\nDone runffx splitdata.")
 
 def aboutdata(args):
     help = """
@@ -127,14 +127,14 @@ Simply prints the number of variables and number of samples for the given ascii 
 
 """    
     if len(args) != 1:
-        print help, "\nGot %d arguments; need 1." % len(args); return
+        print(help, "\nGot %d arguments; need 1." % len(args)); return
     
     d = numpy.shape(read(args[0]))
     if len(d) == 1:
         d = 1,d[0]
-    print "Data file: %s" % args[0]
-    print "Number of input variables: %d" % d[0]
-    print "Number of input samples: %d" % d[1]
+    print("Data file: %s" % args[0])
+    print("Number of input variables: %d" % d[0])
+    print("Number of input samples: %d" % d[1])
 
 
 def testffx(args):
@@ -159,8 +159,8 @@ because the output is scalar.  Values in a given row are separated by spaces.
     #got the right number of args?  If not, output help
     num_args = len(args)
     if not (4 <= num_args <= 5):
-        print help, '\nGot %d args. Need 4 or 5.' % num_args; return
-    print "Begin ffx test."
+        print(help, '\nGot %d args. Need 4 or 5.' % num_args); return
+    print("Begin ffx test.")
 
     #get X/y
     train_X, train_y, test_X, test_y = [read(f,dim) for f,dim in zip(args[:4],[2,1,2,1])] 
@@ -183,8 +183,8 @@ because the output is scalar.  Values in a given row are separated by spaces.
             f.write('%10s, %13s, %s\n' % 
                     ('%d' % model.numBases(), '%.4f' % (model.test_nmse * 100.0), model))
     elapsed_time = time.time() - start_time
-    print "Done.  Runtime: %.1f seconds.  Results are in: %s" % \
-        (elapsed_time, output_csv)
+    print("Done.  Runtime: %.1f seconds.  Results are in: %s" % 
+          (elapsed_time, output_csv))
 
 #=================================================================================
 #utility functions
@@ -206,12 +206,12 @@ def read(filename, dim=None, **kwargs):
 #=================================================================================
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        print USAGE
+        print(USAGE)
         sys.exit(0)
         
     toolname, args = sys.argv[1], sys.argv[2:]
     if toolname == 'help':
-        print USAGE
+        print(USAGE)
     elif toolname == 'splitdata':
         splitdata(args)
     elif toolname == 'aboutdata':
@@ -219,7 +219,7 @@ if __name__ == '__main__':
     elif toolname == 'test':
         testffx(args)
     else:
-        print "There is no toolname of '%s'." % toolname, USAGE
+        print("There is no toolname of '%s'." % toolname, USAGE)
     
     
     
