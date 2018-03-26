@@ -686,6 +686,11 @@ class FFXModelFactory:
                     if exponent == 1.0 and ss.thresholdOps():
                         minx, maxx = min(X[:, var_i]), max(X[:, var_i])
                         rangex = maxx - minx
+                        if rangex == 0:
+                            rangex = math.sqrt(numpy.finfo(float).eps) * \
+                                     float(ss.num_thrs_per_var + 1)
+                            minx -= 0.5 * rangex
+                            maxx += 0.5 * rangex
                         stepx = 0.8 * rangex / float(ss.num_thrs_per_var + 1)
                         thrs = numpy.arange(
                             minx + 0.2 * rangex, maxx - 0.2 * rangex + 0.1 * rangex, stepx)
