@@ -686,8 +686,8 @@ class FFXModelFactory:
                     if exponent == 1.0 and ss.thresholdOps():
                         minx, maxx = min(X[:, var_i]), max(X[:, var_i])
                         rangex = maxx - minx
-			if rangex == 0:
-		            eps = numpy.nextafter(minx, numpy.inf) - minx
+                        if rangex == 0:
+                            eps = numpy.nextafter(minx, numpy.inf) - minx
                             # 20 = 2 * 10 is the minimum factor, due            
                             # to maxx potentially ending up having              
                             # twice the ulp, and the usage of 1/10 in           
