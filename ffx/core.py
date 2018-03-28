@@ -692,7 +692,7 @@ class FFXModelFactory:
                             # to maxx potentially ending up having              
                             # twice the ulp, and the usage of 1/10 in           
                             # generating thrs                                   
-                            rangex = 20 * (num_thrs_per_var + 1) * eps
+                            rangex = 20 * (ss.num_thrs_per_var + 1) * eps
                             # The correct number of steps is recovered          
                             # by numpy.arange if rangex = 10 (maxx -            
                             # minx) / 11                                        
