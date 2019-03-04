@@ -639,6 +639,11 @@ class FFXModelFactory:
         if self.nrow != len(y):
             raise Exception('X sample count and y sample count do not match')
 
+        # if y has shape (N, 1) then we reshape to just (N,)
+        if len(y.shape) > 1:
+            assert y.shape[1] == 1
+            y = numpy.reshape(y, (y.shape[0],))
+
         if self.ncol == 0:
             print('  Corner case: no input vars, so return a ConstantModel')
             return [ConstantModel(y.mean(), 0)]
