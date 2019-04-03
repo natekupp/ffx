@@ -2,7 +2,7 @@ import os
 from setuptools import setup
 setup(
     name = "ffx",
-    version = "1.3.9",
+    version = "1.3.10",
     author = "Trent McConaghy",
     author_email = "gtrent@gmail.com",
     maintainer = "Nate Kupp",
