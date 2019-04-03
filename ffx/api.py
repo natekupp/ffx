@@ -19,6 +19,9 @@ class FFXRegressor(BaseEstimator, RegressorMixin):
         else:
             varnames = ["X%d" % i for i in range(len(X))]
         self._models = run(X, y, X, y, varnames=varnames)
+        self._model = self._models[-1]
     def predict(self, X):
-        # take the last model of the Pareto front: largest, most accurate
-        return self._models[-1].simulate(X)
+        return self._model.simulate(X)
+    def complexity(self):
+        return self._model.complexity()
+        
