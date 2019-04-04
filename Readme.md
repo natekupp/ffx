@@ -15,7 +15,7 @@ To install from PyPI, simply run:
 	pip install ffx
 
 ## Usage
-FFX can either be run in stand-alone mode, or within your existing Python code. It installs both a command-line utility `runffx` and the Python module `ffx`.
+FFX can either be run in stand-alone mode, or within your existing Python code using its own API or a Scikit-learn style API. It installs both a command-line utility `runffx` and the Python module `ffx`.
 
 __Standalone__
 
@@ -23,9 +23,9 @@ __Standalone__
 
 Use `runffx help` for more information on using the command-line utility.
 
-__Python Module__
+__Python Module (run interface)__
 
-The following snippet is a simple example of how to use FFX. Note that all arguments are expected to be of type `numpy.ndarray` or `pandas.DataFrame`.
+The FFX Python module exposes a function, `ffx.run()`. The following snippet is a simple example of how to use FFX this way. Note that all arguments are expected to be of type `numpy.ndarray` or `pandas.DataFrame`.
 
 	import numpy as np
 	import ffx
@@ -41,14 +41,32 @@ The following snippet is a simple example of how to use FFX. Note that all argum
 	    yhat = model.simulate(test_X)
 	    print(model)
 
-Presently, the FFX Python module only exposes a single API method, `ffx.run()`.
+__Scikit-Learn interface__
+
+The FFX Python module also exposes a class, `ffx.FFXRegressor` which provides a Scikit-learn API, in particular `fit(X, y)`, `predict(X)`, and `score(X, y)` methods. In this API, all of the models produced by FFX (the whole Pareto front) are accessible after `fit()`ing as `_models`, but `predict()` and `score()` will use only the model of highest accuracy and highest complexity. Here is an example of usage.
+
+    import numpy as np
+    import ffx
+    
+    # This creates a dataset of 2 predictors
+    X = np.random.random((20, 2))
+    y = 0.1 * X[:, 0] + 0.5 * X[:, 1]
+    
+    train_X, test_X = X[:10], X[10:]
+    train_y, test_y = y[:10], y[10:]
+    
+    FFX = ffx.FFXRegressor()
+    FFX.fit(train_X, train_y)
+    print("Prediction:", FFX.predict(test_X))
+    print("Score:", FFX.score(test_X, test_y))
+
 
 
 ## Dependencies
-* python (tested on 2.5, 2.6, 2.7, and 3.5)
+* python (tested on 2.5, 2.6, 2.7, 3.5, 3.6, 3.7)
 * numpy (1.6.0+)
 * scipy (0.9.0+)
-* scikit-learn (0.9+)
+* scikit-learn (1.5+)
 * pandas (optional, enables support for labeled `pandas.DataFrame` datasets)
 
 

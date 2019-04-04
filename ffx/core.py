@@ -291,7 +291,7 @@ class FFXModel:
         # the base itself.
         num_complexity = 1 + sum(3 + b.complexity() for b in self.bases_n)
         if self.bases_d:
-            denom_complexity = 1 + sum(2 + b.complexity()
+            denom_complexity = 1 + sum(3 + b.complexity()
                                        for b in self.bases_d)
             # add 1 for the division
             return num_complexity + 1 + denom_complexity
@@ -398,17 +398,27 @@ class OperatorBase:
             raise 'Unknown op %d' % op
 
     def complexity(self):
+        """Return an integer measure of model complexity. It's intended to
+        measure the number of nodes in the GP tree corresponding to
+        the model. We assume the GP language includes: +, -, *, /,
+        MAX0, MIN0, LOG10 but not GTH, LTH.  Thus, MAX0(x) returns the
+        value max(0, x) but contributes only 1 + complexity(x) to the
+        complexity count. GTH(thr, x) returns the value max(0, thr-x)
+        but because it would be implemented in GP as MAX0(thr-x) it contributes
+        3 + complexity(x) to the count."""
+        
         op = self.nonlin_op
-        if op == OP_ABS:     return 1 + self.simple_base.complexity()
-        elif op == OP_MAX0:  return 2 + self.simple_base.complexity()
-        elif op == OP_MIN0:  return 2 + self.simple_base.complexity()
-        elif op == OP_LOG10: return 1 + self.simple_base.complexity()
-        elif op == OP_GTH:   return 4 + self.simple_base.complexity()
-        elif op == OP_LTH:   return 4 + self.simple_base.complexity()
-        else:                raise 'Unknown op %d' % op
+        if   op == OP_ABS:     return 1 + self.simple_base.complexity()
+        elif op == OP_MAX0:    return 1 + self.simple_base.complexity() 
+        elif op == OP_MIN0:    return 1 + self.simple_base.complexity()
+        elif op == OP_LOG10:   return 1 + self.simple_base.complexity()
+        elif op == OP_GTH:     return 3 + self.simple_base.complexity()
+        elif op == OP_LTH:     return 3 + self.simple_base.complexity()
+        else:                  raise 'Unknown op %d' % op
 
 
 class ProductBase:
+
     """e.g. x2^2 * log(x1^3)"""
 
     def __init__(self, base1, base2):
@@ -638,6 +648,11 @@ class FFXModelFactory:
         y = numpy.asarray(y)
         if self.nrow != len(y):
             raise Exception('X sample count and y sample count do not match')
+
+        # if y has shape (N, 1) then we reshape to just (N,)
+        if len(y.shape) > 1:
+            assert y.shape[1] == 1
+            y = numpy.reshape(y, (y.shape[0],))
 
         if self.ncol == 0:
             print('  Corner case: no input vars, so return a ConstantModel')
