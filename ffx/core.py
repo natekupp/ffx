@@ -702,8 +702,10 @@ class FFXModelFactory:
                         minx, maxx = min(X[:, var_i]), max(X[:, var_i])
                         rangex = maxx - minx
                         stepx = 0.8 * rangex / float(ss.num_thrs_per_var + 1)
-                        thrs = numpy.arange(
-                            minx + 0.2 * rangex, maxx - 0.2 * rangex + 0.1 * rangex, stepx)
+                        thrs = [maxx]
+                        if rangex > 0:
+                            thrs = numpy.arange(
+                                minx + 0.2 * rangex, maxx - 0.2 * rangex + 0.1 * rangex, stepx)
                         for threshold_op in ss.thresholdOps():
                             for thr in thrs:
                                 nonsimple_base = OperatorBase(
