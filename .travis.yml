@@ -36,6 +36,7 @@ before_script:
 
 script:
   - coverage${PYVERSION} run --source ffx tests/x_square_test.py
+  - python tests/test_sklearn_api.py
 
 after_success:
   - coveralls
