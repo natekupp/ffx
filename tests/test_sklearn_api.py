@@ -19,4 +19,4 @@ print("Complexity:", FFX.complexity())
 print("Model:", FFX._model)
 
 # This tests the regressor using sklearn's test facilities
-check_estimator(FFXRegressor)
+check_estimator(ffx.FFXRegressor)

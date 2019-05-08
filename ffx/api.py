@@ -1,4 +1,6 @@
 from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.utils import check_array, check_X_y
+from sklearn.utils.validation import check_is_fitted
 from . import core
 
 """ api.py defines user interfaces to FFX. run() runs the complete method.
@@ -18,6 +20,7 @@ class FFXRegressor(BaseEstimator, RegressorMixin):
         pass
 
     def fit(self, X, y):
+        X, y = check_X_y(X, y, y_numeric=True, multi_output=False)
         # if X is a Pandas DataFrame, we don't have to pass in varnames.
         # otherwise we make up placeholders.
         if hasattr(X, 'columns'):
@@ -29,6 +32,8 @@ class FFXRegressor(BaseEstimator, RegressorMixin):
         return self
 
     def predict(self, X):
+        check_is_fitted(self, "_model")
+        X = check_array(X, accept_sparse=False)
         return self._model.simulate(X)
 
     def complexity(self):
