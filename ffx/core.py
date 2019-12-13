@@ -64,7 +64,7 @@ from functools import wraps
 import numpy
 import scipy
 from sklearn.linear_model import ElasticNet
-
+from sklearn.base import RegressorMixin
 
 # user-changeable constants
 CONSIDER_INTER = True  # consider interactions?
@@ -176,7 +176,7 @@ class FFXBuildStrategy(object):
 #models / bases
 
 
-class FFXModel:
+class FFXModel(RegressorMixin):
 
     def __init__(self, coefs_n, bases_n, coefs_d, bases_d, varnames=None):
         """
@@ -446,7 +446,7 @@ class ProductBase:
         return 1 + self.base1.complexity() + self.base2.complexity()
 
 
-class ConstantModel:
+class ConstantModel(RegressorMixin):
     """e.g. 3.2"""
 
     def __init__(self, constant, numvars):
@@ -478,6 +478,9 @@ class ConstantModel:
         else:  # typical case
             yhat = numpy.ones(N, dtype=float) * self.constant
         return yhat
+
+    def predict(self, X):
+        return self.simulate(X)
 
     def __str__(self):
         return self.str2()

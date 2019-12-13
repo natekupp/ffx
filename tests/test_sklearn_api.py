@@ -12,7 +12,17 @@ train_y, test_y = y[:10], y[10:]
 
 FFX = ffx.FFXRegressor()
 FFX.fit(train_X, train_y)
+
+print("Choosing the single most accurate model:")
+print("Model:", FFX.model_)
 print("Prediction:", FFX.predict(test_X))
 print("Score:", FFX.score(test_X, test_y))
 print("Complexity:", FFX.complexity())
-print("Model:", FFX.model_)
+
+print("\nLooking at all models, one by one:")
+for model in FFX.models_:
+    print("\nModel:", model)
+    print("Prediction:", model.predict(test_X))
+    print("Score:", model.score(test_X, test_y))
+    print("Complexity:", model.complexity())
+    
