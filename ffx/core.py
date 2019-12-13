@@ -709,7 +709,7 @@ class FFXModelFactory:
                             thrs = numpy.arange(
                                 minx + 0.2 * rangex, maxx - 0.2 * rangex + 0.1 * rangex, stepx)
                         else:
-                            thrs = [maxx]
+                            continue
                         for threshold_op in ss.thresholdOps():
                             for thr in thrs:
                                 nonsimple_base = OperatorBase(
