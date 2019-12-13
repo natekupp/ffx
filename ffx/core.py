@@ -245,6 +245,9 @@ class FFXModel:
 
         return y
 
+    def predict(self, X):
+        return self.simulate(X)
+
     def __str__(self):
         return self.str2()
 
