@@ -25,4 +25,3 @@ for model in FFX.models_:
     print("Prediction:", model.predict(test_X))
     print("Score:", model.score(test_X, test_y))
     print("Complexity:", model.complexity())
-    

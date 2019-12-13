@@ -24,4 +24,3 @@ class FFXRegressor(BaseEstimator, RegressorMixin):
         return self.model_.predict(X)
     def complexity(self):
         return self.model_.complexity()
-        
