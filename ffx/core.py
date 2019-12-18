@@ -64,7 +64,7 @@ from functools import wraps
 import numpy
 import scipy
 from sklearn.linear_model import ElasticNet
-
+from sklearn.base import RegressorMixin
 
 # user-changeable constants
 CONSIDER_INTER = True  # consider interactions?
@@ -176,7 +176,7 @@ class FFXBuildStrategy(object):
 #models / bases
 
 
-class FFXModel:
+class FFXModel(RegressorMixin):
 
     def __init__(self, coefs_n, bases_n, coefs_d, bases_d, varnames=None):
         """
@@ -244,6 +244,9 @@ class FFXModel:
             y /= denom_y
 
         return y
+
+    def predict(self, X):
+        return self.simulate(X)
 
     def __str__(self):
         return self.str2()
@@ -443,7 +446,7 @@ class ProductBase:
         return 1 + self.base1.complexity() + self.base2.complexity()
 
 
-class ConstantModel:
+class ConstantModel(RegressorMixin):
     """e.g. 3.2"""
 
     def __init__(self, constant, numvars):
@@ -475,6 +478,9 @@ class ConstantModel:
         else:  # typical case
             yhat = numpy.ones(N, dtype=float) * self.constant
         return yhat
+
+    def predict(self, X):
+        return self.simulate(X)
 
     def __str__(self):
         return self.str2()
@@ -701,9 +707,12 @@ class FFXModelFactory:
                     if exponent == 1.0 and ss.thresholdOps():
                         minx, maxx = min(X[:, var_i]), max(X[:, var_i])
                         rangex = maxx - minx
-                        stepx = 0.8 * rangex / float(ss.num_thrs_per_var + 1)
-                        thrs = numpy.arange(
-                            minx + 0.2 * rangex, maxx - 0.2 * rangex + 0.1 * rangex, stepx)
+                        if rangex > 0:
+                            stepx = 0.8 * rangex / float(ss.num_thrs_per_var + 1)
+                            thrs = numpy.arange(
+                                minx + 0.2 * rangex, maxx - 0.2 * rangex + 0.1 * rangex, stepx)
+                        else:
+                            continue
                         for threshold_op in ss.thresholdOps():
                             for thr in thrs:
                                 nonsimple_base = OperatorBase(
