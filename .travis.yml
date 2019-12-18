@@ -1,41 +1,24 @@
 language: python
 
-matrix:
-    fast_finish: true
-    include:
-        - os: linux
-          dist: trusty
-          sudo: required
-          python: 3.5
-          env: PYVERSION="3"
-        - os: linux
-          dist: trusty
-          sudo: required
-          python: 2.7
-          env: PYVERSION=""
-        - os: linux
-          dist: precise
-          sudo: required
-          python: 3.5
-          env: PYVERSION="3"
-        - os: linux
-          dist: precise
-          sudo: required
-          python: 2.7
-          env: PYVERSION=""
+jobs:
+  include:
+    - python: "2.7"
+      env: NOVALIDATE=0
+    - python: "3.5"
+      env: NOVALIDATE=0
+    - python: "3.6"
+    - python: "3.7"
 
 install:
-    - pip${PYVERSION} install --upgrade pip setuptools wheel
-    - pip${PYVERSION} install coveralls codecov
-    - pip${PYVERSION} install --only-binary=numpy,scipy scipy
-    - pip${PYVERSION} install scikit-learn
-    - pip${PYVERSION} install git+https://github.com/natekupp/ffx
+  - pip install -r dev-requirements.txt
+  - pip install -e .
 
 before_script:
-    - export PYTHONPATH=$(pwd):$PYTHONPATH;
+  - export PYTHONPATH=$(pwd):$PYTHONPATH;
 
 script:
-  - coverage${PYVERSION} run --source ffx tests/x_square_test.py
+  - '[ -z "$NOVALIDATE" ] && make validate || echo "skipping validate"'
+  - pytest --cov ffx
 
 after_success:
   - coveralls

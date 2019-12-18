@@ -1,0 +1,7 @@
+black==19.10b0; python_version >= '3.6'
+coveralls==1.9.2
+codecov
+isort>=4.3.21
+pylint>=2.4.1; python_version >= '3.6'
+pytest==4.6.7
+pytest-cov==2.7.1
