@@ -14,3 +14,6 @@ pypi:
 	python setup.py sdist bdist_egg bdist_wheel
 	twine upload dist/*
 	#twine upload --repository-url https://test.pypi.org/legacy/ dist/* # testpypi
+
+test:
+	pytest ffx_tests/

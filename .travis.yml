@@ -1,35 +1,13 @@
 language: python
-
-matrix:
-  fast_finish: true
-  include:
-    - os: linux
-      dist: bionic
-      sudo: required
-      python: 3.7
-      env: PYVERSION="3"
-    - os: linux
-      dist: bionic
-      sudo: required
-      python: 3.6
-      env: PYVERSION="3"
-    - os: linux
-      dist: bionic
-      sudo: required
-      python: 3.5
-      env: PYVERSION="3"
-    - os: linux
-      dist: bionic
-      sudo: required
-      python: 2.7
-      env: PYVERSION=""
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+  - "3.7"
 
 install:
-  - pip${PYVERSION} install --upgrade pip setuptools wheel
-  - pip${PYVERSION} install coveralls codecov pytest-cov pytest
-  - pip${PYVERSION} install --only-binary=numpy,scipy scipy
-  - pip${PYVERSION} install scikit-learn
-  - pip${PYVERSION} install git+https://github.com/natekupp/ffx
+  - pip install -r dev-requirements.txt
+  - pip install -e .
 
 before_script:
   - export PYTHONPATH=$(pwd):$PYTHONPATH;
