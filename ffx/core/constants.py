@@ -1,4 +1,3 @@
-# user-changeable constants
 CONSIDER_INTER = True  # consider interactions?
 CONSIDER_DENOM = True  # consider denominator?
 CONSIDER_EXPON = True  # consider exponents?
