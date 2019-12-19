@@ -11,6 +11,7 @@ from six.moves import range, zip
 from sklearn.base import RegressorMixin
 from sklearn.linear_model import ElasticNet
 
+from .approach import Approach
 from .constants import (
     CONSIDER_DENOM,
     CONSIDER_EXPON,
@@ -27,19 +28,6 @@ from .constants import (
     OP_MIN0,
 )
 
-
-def _approachStr(approach):
-    assert len(approach) == 5
-    assert set(approach).issubset([0, 1])
-    return 'inter%d denom%d expon%d nonlin%d thresh%d' % (
-        approach[0],
-        approach[1],
-        approach[2],
-        approach[3],
-        approach[4],
-    )
-
-
 # =========================================================================
 # strategy
 
@@ -52,11 +40,9 @@ class FFXBuildStrategy(object):
         @arguments
           approach -- 5-d list of [use_inter, use_denom, use_expon, use_nonlin, use_thresh]
         """
-        assert len(approach) == 5
-        assert set(approach).issubset([0, 1])
         self.approach = approach
 
-        self.num_alphas = 1000
+        self._num_alphas = 1000
 
         # final round will stop if either of these is hit
         self.final_target_train_nmse = 0.01  # 0.01 = 1%
@@ -81,28 +67,19 @@ class FFXBuildStrategy(object):
         self.all_expr_exponents = [-1.0, -0.5, +0.5, +1.0]
 
     def includeInteractions(self):
-        return bool(self.approach[0])
+        return bool(self.approach.use_inter)
 
     def includeDenominator(self):
-        return bool(self.approach[1])
+        return bool(self.approach.use_denom)
 
     def exprExponents(self):
-        if self.approach[2]:
-            return self.all_expr_exponents
-        else:
-            return [1.0]
+        return self.all_expr_exponents if self.approach.use_expon else [1.0]
 
     def nonlinOps(self):
-        if self.approach[3]:
-            return self.all_nonlin_ops
-        else:
-            return []
+        return self.all_nonlin_ops if self.approach.use_nonlin else []
 
     def thresholdOps(self):
-        if self.approach[4]:
-            return self.all_threshold_ops
-        else:
-            return []
+        return self.all_threshold_ops if self.approach.use_thresh else []
 
     def eps(self):
         return self._eps
@@ -111,7 +88,7 @@ class FFXBuildStrategy(object):
         return self._l1_ratio
 
     def numAlphas(self):
-        return self.num_alphas
+        return self._num_alphas
 
 
 # =========================================================================
@@ -506,20 +483,19 @@ class MultiFFXModelFactory:
                         for thresh in [0, 1]:
                             if thresh == 1 and not CONSIDER_THRESH:
                                 continue
-                            approach = [inter, denom, expon, nonlin, thresh]
-                            if sum(approach) >= 4:
+                            approach = Approach(inter, denom, expon, nonlin, thresh)
+                            if approach.num_feature_types >= 4:
                                 continue  # not too many features at once
                             approaches.append(approach)
                             if verbose:
-                                # "  ", _approachStr(approach)
-                                print('\t'.join(['Yes' if a else 'No' for a in approach]))
+                                print(approach)
 
         for (i, approach) in enumerate(approaches):
             if verbose:
                 print('-' * 200)
                 print(
                     'Build with approach %d/%d (%s): begin'
-                    % (i + 1, len(approaches), _approachStr(approach))
+                    % (i + 1, len(approaches), str(approach))
                 )
             ss = FFXBuildStrategy(approach)
 
@@ -540,7 +516,7 @@ class MultiFFXModelFactory:
             if verbose:
                 print(
                     'Build with approach %d/%d (%s): done.  %d model(s).'
-                    % (i + 1, len(approaches), _approachStr(approach), len(next_models))
+                    % (i + 1, len(approaches), str(approach), len(next_models))
                 )
                 print('Models:')
                 for model in next_models:
@@ -563,15 +539,6 @@ class MultiFFXModelFactory:
                 )
 
         return models
-
-    def _FFXapproach(self, inter, denom, expon, nonlin, thresh):
-        return 'FFX inter%d denom%d expon%d nonlin%d thresh%d' % (
-            inter,
-            denom,
-            expon,
-            nonlin,
-            thresh,
-        )
 
     def _nondominatedModels(self, models):
         test_nmses = [model.test_nmse for model in models]
