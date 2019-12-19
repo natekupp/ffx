@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ffx',
-    version='1.3.10',
+    version='1.4.0',
     author='Trent McConaghy',
     author_email='gtrent@gmail.com',
     maintainer='Nate Kupp',
@@ -14,8 +14,16 @@ setup(
     keywords='symbolic regression machine learning',
     url='https://github.com/natekupp/ffx',
     packages=['ffx'],
-    scripts=['ffx/bin/runffx'],
-    install_requires=['numpy', 'pandas', 'scipy', 'six', 'scikit-learn'],
+    entry_points={'console_scripts': ['ffx = ffx.cli:main']},
+    install_requires=[
+        'click>=5.0',
+        'contextlib2>=0.5.4',
+        'numpy',
+        'pandas',
+        'scipy',
+        'six',
+        'sklearn',
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
