@@ -6,31 +6,26 @@ from functools import wraps
 
 # 3rd party dependencies
 import numpy
-import scipy
+import pandas as pd
 from six.moves import range, zip
 from sklearn.base import RegressorMixin
 from sklearn.linear_model import ElasticNet
 
-# user-changeable constants
-CONSIDER_INTER = True  # consider interactions?
-CONSIDER_DENOM = True  # consider denominator?
-CONSIDER_EXPON = True  # consider exponents?
-CONSIDER_NONLIN = True  # consider abs() and log()?
-CONSIDER_THRESH = True  # consider hinge functions?
-
-
-# Make dependency on pandas optional.
-try:
-    import pandas
-except ImportError:
-    pandas = None
-
-INF = float('Inf')
-# maximum time (s) for regularization update during pathwise learn.
-MAX_TIME_REGULARIZE_UPDATE = 5
-
-# GTH = Greater-Than Hinge function, LTH = Less-Than Hinge function
-OP_ABS, OP_MAX0, OP_MIN0, OP_LOG10, OP_GTH, OP_LTH = 1, 2, 3, 4, 5, 6
+from .constants import (
+    CONSIDER_DENOM,
+    CONSIDER_EXPON,
+    CONSIDER_INTER,
+    CONSIDER_NONLIN,
+    CONSIDER_THRESH,
+    INF,
+    MAX_TIME_REGULARIZE_UPDATE,
+    OP_ABS,
+    OP_GTH,
+    OP_LOG10,
+    OP_LTH,
+    OP_MAX0,
+    OP_MIN0,
+)
 
 
 def _approachStr(approach):
@@ -310,7 +305,7 @@ class OperatorBase:
         elif op == OP_LOG10:
             # safeguard against: log() on values <= 0.0
             mn, mx = min(y_lin), max(y_lin)
-            if mn <= 0.0 or scipy.isnan(mn) or mx == INF or scipy.isnan(mx):
+            if mn <= 0.0 or numpy.isnan(mn) or mx == INF or numpy.isnan(mx):
                 ok = False
             else:
                 ya = numpy.log10(y_lin)
@@ -425,7 +420,7 @@ class ConstantModel(RegressorMixin):
           y -- 1d array of [sample_i] : float
         """
         N = X.shape[0]
-        if scipy.isnan(self.constant):  # corner case
+        if numpy.isnan(self.constant):  # corner case
             yhat = numpy.array([INF] * N)
         else:  # typical case
             yhat = numpy.ones(N, dtype=float) * self.constant
@@ -466,7 +461,7 @@ class MultiFFXModelFactory:
           models -- list of FFXModel -- Pareto-optimal set of models
         """
 
-        if pandas is not None and isinstance(train_X, pandas.DataFrame):
+        if isinstance(train_X, pd.DataFrame):
             varnames = train_X.columns
             train_X = train_X.to_numpy()
             test_X = test_X.to_numpy()
@@ -605,9 +600,9 @@ class FFXModelFactory:
         @return
           models -- list of FFXModel -- Pareto-optimal set of models
         """
-        if pandas is not None and isinstance(X, pandas.DataFrame):
+        if isinstance(X, pd.DataFrame):
             varnames = X.columns
-            X = X.as_matrix()
+            X = X.to_numpy()
         if isinstance(X, numpy.ndarray) and varnames is None:
             raise Exception('varnames required for numpy.ndarray')
 
@@ -861,7 +856,7 @@ class FFXModelFactory:
 
         n_samples = X_unbiased.shape[0]
         vals = numpy.dot(X_unbiased.T, y_unbiased)
-        vals = [val for val in vals if not scipy.isnan(val)]
+        vals = [val for val in vals if not numpy.isnan(val)]
         if vals:
             alpha_max = numpy.abs(max(vals) / (n_samples * ss.l1_ratio()))
         else:
@@ -948,7 +943,7 @@ class FFXModelFactory:
                 )
 
             # maybe stop
-            if scipy.isinf(nmses[-1]):
+            if numpy.isinf(nmses[-1]):
                 if verbose:
                     print('    Pathwise learn: Early stop because nmse is inf')
                 return None
@@ -1176,7 +1171,7 @@ def nmse(yhat, y, min_y, max_y):
     y_range = float(max_y - min_y)
     try:
         result = math.sqrt(numpy.mean(((yhat_a - y_a) / y_range) ** 2))
-        if scipy.isnan(result):
+        if numpy.isnan(result):
             return INF
         return result
     except:  # pylint: disable=bare-except
@@ -1185,7 +1180,7 @@ def nmse(yhat, y, min_y, max_y):
 
 def yIsPoor(y):
     """Returns True if y is not usable"""
-    return max(scipy.isinf(y)) or max(scipy.isnan(y))
+    return max(numpy.isinf(y)) or max(numpy.isnan(y))
 
 
 def coefStr(x):

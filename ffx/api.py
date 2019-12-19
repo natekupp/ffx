@@ -4,10 +4,10 @@ FFXRegressor is a Scikit-learn style regressor.
 
 from sklearn.base import BaseEstimator, RegressorMixin
 
-from . import core
-
 
 def run(train_X, train_y, test_X, test_y, varnames=None, verbose=False):
+    from ffx import core
+
     return core.MultiFFXModelFactory().build(train_X, train_y, test_X, test_y, varnames, verbose)
 
 
