@@ -7,7 +7,6 @@ from functools import wraps
 # 3rd party dependencies
 import numpy
 import pandas as pd
-import scipy
 from six.moves import range, zip
 from sklearn.base import RegressorMixin
 from sklearn.linear_model import ElasticNet
@@ -306,7 +305,7 @@ class OperatorBase:
         elif op == OP_LOG10:
             # safeguard against: log() on values <= 0.0
             mn, mx = min(y_lin), max(y_lin)
-            if mn <= 0.0 or scipy.isnan(mn) or mx == INF or scipy.isnan(mx):
+            if mn <= 0.0 or numpy.isnan(mn) or mx == INF or numpy.isnan(mx):
                 ok = False
             else:
                 ya = numpy.log10(y_lin)
@@ -421,7 +420,7 @@ class ConstantModel(RegressorMixin):
           y -- 1d array of [sample_i] : float
         """
         N = X.shape[0]
-        if scipy.isnan(self.constant):  # corner case
+        if numpy.isnan(self.constant):  # corner case
             yhat = numpy.array([INF] * N)
         else:  # typical case
             yhat = numpy.ones(N, dtype=float) * self.constant
@@ -857,7 +856,7 @@ class FFXModelFactory:
 
         n_samples = X_unbiased.shape[0]
         vals = numpy.dot(X_unbiased.T, y_unbiased)
-        vals = [val for val in vals if not scipy.isnan(val)]
+        vals = [val for val in vals if not numpy.isnan(val)]
         if vals:
             alpha_max = numpy.abs(max(vals) / (n_samples * ss.l1_ratio()))
         else:
@@ -944,7 +943,7 @@ class FFXModelFactory:
                 )
 
             # maybe stop
-            if scipy.isinf(nmses[-1]):
+            if numpy.isinf(nmses[-1]):
                 if verbose:
                     print('    Pathwise learn: Early stop because nmse is inf')
                 return None
@@ -1172,7 +1171,7 @@ def nmse(yhat, y, min_y, max_y):
     y_range = float(max_y - min_y)
     try:
         result = math.sqrt(numpy.mean(((yhat_a - y_a) / y_range) ** 2))
-        if scipy.isnan(result):
+        if numpy.isnan(result):
             return INF
         return result
     except:  # pylint: disable=bare-except
@@ -1181,7 +1180,7 @@ def nmse(yhat, y, min_y, max_y):
 
 def yIsPoor(y):
     """Returns True if y is not usable"""
-    return max(scipy.isinf(y)) or max(scipy.isnan(y))
+    return max(numpy.isinf(y)) or max(numpy.isnan(y))
 
 
 def coefStr(x):
