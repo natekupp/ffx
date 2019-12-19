@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-import numpy as np
 import ffx
+import numpy as np
 
 # This creates a dataset of 2 predictors
-X = np.random.random((20, 2))
+X = np.random.random((20, 2))  # pylint: disable=no-member
 y = 0.1 * X[:, 0] + 0.5 * X[:, 1]
 
 train_X, test_X = X[:10], X[10:]

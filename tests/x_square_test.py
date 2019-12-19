@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import numpy as np
 import ffx
+import numpy as np
 
 # This creates a dataset of 1 predictor
 train_X = np.array([[0, 1, 2, 3]]).T
@@ -16,5 +16,4 @@ print('True model: y = x^2')
 print('Results:')
 print('Num bases,Test error (%),Model\n')
 for model in models:
-    print('%10s, %13s, %s\n' %
-          ('%d' % model.numBases(), '%.4f' % (model.test_nmse * 100.0), model))
+    print('%10s, %13s, %s\n' % ('%d' % model.numBases(), '%.4f' % (model.test_nmse * 100.0), model))
