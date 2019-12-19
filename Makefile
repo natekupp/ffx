@@ -5,7 +5,7 @@ black:
 	black ffx --line-length 100 --target-version py27 --target-version py35 --target-version py36 --target-version py37 --target-version py38 -S --fast --exclude "build/|buck-out/|dist/|_build/|\.eggs/|\.git/|\.hg/|\.mypy_cache/|\.nox/|\.tox/|\.venv/"
 
 isort:
-	isort -rc
+	isort -rc -y
 
 validate: pylint isort black
 

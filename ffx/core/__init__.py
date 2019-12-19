@@ -6,31 +6,27 @@ from functools import wraps
 
 # 3rd party dependencies
 import numpy
+import pandas as pd
 import scipy
 from six.moves import range, zip
 from sklearn.base import RegressorMixin
 from sklearn.linear_model import ElasticNet
 
-# user-changeable constants
-CONSIDER_INTER = True  # consider interactions?
-CONSIDER_DENOM = True  # consider denominator?
-CONSIDER_EXPON = True  # consider exponents?
-CONSIDER_NONLIN = True  # consider abs() and log()?
-CONSIDER_THRESH = True  # consider hinge functions?
-
-
-# Make dependency on pandas optional.
-try:
-    import pandas
-except ImportError:
-    pandas = None
-
-INF = float('Inf')
-# maximum time (s) for regularization update during pathwise learn.
-MAX_TIME_REGULARIZE_UPDATE = 5
-
-# GTH = Greater-Than Hinge function, LTH = Less-Than Hinge function
-OP_ABS, OP_MAX0, OP_MIN0, OP_LOG10, OP_GTH, OP_LTH = 1, 2, 3, 4, 5, 6
+from .constants import (
+    CONSIDER_DENOM,
+    CONSIDER_EXPON,
+    CONSIDER_INTER,
+    CONSIDER_NONLIN,
+    CONSIDER_THRESH,
+    INF,
+    MAX_TIME_REGULARIZE_UPDATE,
+    OP_ABS,
+    OP_GTH,
+    OP_LOG10,
+    OP_LTH,
+    OP_MAX0,
+    OP_MIN0,
+)
 
 
 def _approachStr(approach):
@@ -466,7 +462,7 @@ class MultiFFXModelFactory:
           models -- list of FFXModel -- Pareto-optimal set of models
         """
 
-        if pandas is not None and isinstance(train_X, pandas.DataFrame):
+        if isinstance(train_X, pd.DataFrame):
             varnames = train_X.columns
             train_X = train_X.to_numpy()
             test_X = test_X.to_numpy()
@@ -605,9 +601,9 @@ class FFXModelFactory:
         @return
           models -- list of FFXModel -- Pareto-optimal set of models
         """
-        if pandas is not None and isinstance(X, pandas.DataFrame):
+        if isinstance(X, pd.DataFrame):
             varnames = X.columns
-            X = X.as_matrix()
+            X = X.to_numpy()
         if isinstance(X, numpy.ndarray) and varnames is None:
             raise Exception('varnames required for numpy.ndarray')
 

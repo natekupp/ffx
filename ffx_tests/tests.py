@@ -1,10 +1,6 @@
 import ffx
 import numpy as np
 from ffx.core import (
-    ConstantModel,
-    OperatorBase,
-    ProductBase,
-    SimpleBase,
     INF,
     OP_ABS,
     OP_GTH,
@@ -12,6 +8,10 @@ from ffx.core import (
     OP_LTH,
     OP_MAX0,
     OP_MIN0,
+    ConstantModel,
+    OperatorBase,
+    ProductBase,
+    SimpleBase,
 )
 
 EPS = 0.001

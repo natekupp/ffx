@@ -13,6 +13,7 @@ before_script:
   - export PYTHONPATH=$(pwd):$PYTHONPATH;
 
 script:
+  - make validate
   - pytest --cov ffx
 
 after_success:
