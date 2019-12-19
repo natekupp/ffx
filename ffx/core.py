@@ -1,59 +1,3 @@
-"""FFX.py v1.3 (Sept 16, 2011)
-This module implements the Fast Function Extraction (FFX) algorithm.
-
-Reference: Trent McConaghy, FFX: Fast, Scalable, Deterministic Symbolic
-Regression Technology, Genetic Programming Theory and Practice IX, Edited by R.
-Riolo, E. Vladislavleva, and J. Moore, Springer, 2011.  http://www.trent.st/ffx
-
-
-HOW TO USE THIS MODULE:
-
-Easiest to use by calling runffx.py.  Its code has example usage patterns.
-
-The main routines are:
-  models = MultiFFXModelFactory().build(train_X, train_y, test_X, test_y, varnames)
-  yhat = model.simulate(X)
-  print model
-
-Can expand / restrict the set of functions via the user-changeable constants (right below licence).
-
-
-FFX Software Licence Agreement (like BSD, but adapted for non-commercial gain only)
-
-Copyright (c) 2011, Solido Design Automation Inc.  Authored by Trent McConaghy.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Usage does not involve commercial gain.
-    * Redistributions of source code must retain the above copyright notice,
-      this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
-    * Neither the name of the associated institutions nor the names of its
-      contributors may be used to endorse or promote products derived from this
-      software without specific prior written permission.
-
-For permissions beyond the scope of this license, please contact Trent
-McConaghy (trentmc@solidodesign.com).
-
-THIS SOFTWARE IS PROVIDED BY THE DEVELOPERS ''AS IS'' AND ANY EXPRESS OR
-IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-EVENT SHALL THE DEVELOPERS OR THEIR INSTITUTIONS BE LIABLE FOR ANY DIRECT,
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-Patent pending.
-
-"""
-from __future__ import print_function
-
 import math
 import signal
 import sys
@@ -524,8 +468,8 @@ class MultiFFXModelFactory:
 
         if pandas is not None and isinstance(train_X, pandas.DataFrame):
             varnames = train_X.columns
-            train_X = train_X.as_matrix()
-            test_X = test_X.as_matrix()
+            train_X = train_X.to_numpy()
+            test_X = test_X.to_numpy()
         if isinstance(train_X, numpy.ndarray) and varnames is None:
             raise Exception('varnames required for numpy.ndarray')
 
@@ -902,7 +846,7 @@ class FFXModelFactory:
         Returns list of model (or None if failure)."""
         if verbose:
             print('    Pathwise learn: begin. max_num_bases=%d' % max_num_bases)
-        max_iter = 1000  # default 1000. magic number.
+        max_iter = 5000  # default 5000. magic number.
 
         # Condition X and y:
         # -"unbias" = rescale so that (mean=0, stddev=1) -- subtract each row's
