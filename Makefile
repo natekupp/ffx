@@ -10,7 +10,7 @@ isort:
 validate: pylint isort black
 
 pypi:
-	rm dist/*
+	rm -rf dist/*
 	python setup.py sdist bdist_egg bdist_wheel
 	twine upload dist/*
 	#twine upload --repository-url https://test.pypi.org/legacy/ dist/* # testpypi
