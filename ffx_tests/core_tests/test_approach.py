@@ -1,5 +1,4 @@
 import pytest
-
 from ffx.core.approach import Approach
 
 
