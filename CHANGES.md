@@ -1,5 +1,9 @@
 # Changes
 
+## 2.0.1
+
+- Fix ImportError introduced in 2.0.0
+
 ## 2.0.0
 
 - Added a Makefile

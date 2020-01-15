@@ -3,8 +3,8 @@ import os
 import click
 import numpy as np
 import pandas as pd
-from ffx.api import run
 
+from .api import run
 from .time_utils import time_execution_scope
 
 
