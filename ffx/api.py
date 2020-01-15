@@ -6,9 +6,9 @@ from sklearn.base import BaseEstimator, RegressorMixin
 
 
 def run(train_X, train_y, test_X, test_y, varnames=None, verbose=False):
-    from ffx import core
+    from .core import MultiFFXModelFactory
 
-    return core.MultiFFXModelFactory().build(train_X, train_y, test_X, test_y, varnames, verbose)
+    return MultiFFXModelFactory().build(train_X, train_y, test_X, test_y, varnames, verbose)
 
 
 class FFXRegressor(BaseEstimator, RegressorMixin):
