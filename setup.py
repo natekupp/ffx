@@ -1,8 +1,8 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name='ffx',
-    version='2.0.1',
+    version='2.0.2',
     author='Trent McConaghy',
     author_email='gtrent@gmail.com',
     maintainer='Nate Kupp',
@@ -13,7 +13,7 @@ setup(
     license='See LICENSE',
     keywords='symbolic regression machine learning',
     url='https://github.com/natekupp/ffx',
-    packages=['ffx'],
+    packages=find_packages(exclude=['ffx_tests']),
     entry_points={'console_scripts': ['ffx = ffx.cli:main']},
     install_requires=['click>=5.0', 'contextlib2>=0.5.4', 'numpy', 'pandas', 'six', 'sklearn',],
     classifiers=[
