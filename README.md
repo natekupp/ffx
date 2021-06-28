@@ -5,7 +5,7 @@
 
 FFX is a technique for symbolic regression. It is:
 
-- **Fast** - runtime 5-60 seconds, depending on problem size (1GHz cpu)
+- **Fast** - runtime 5-60 seconds, depending on problem size
 - **Scalable** - 1000 input variables, no problem!
 - **Deterministic** - no need to "hope and pray".
 
