@@ -1,5 +1,6 @@
 import ffx
 import numpy as np
+from sklearn.utils.estimator_checks import check_estimator
 
 EXPECTED_MODELS = [
     (0, 1, '0.298'),
@@ -40,3 +41,9 @@ def test_sklearn_api():
     assert [
         (model.numBases(), model.complexity(), str(model)) for model in FFX.models_
     ] == EXPECTED_MODELS
+
+
+def test_check_estimator():
+    # Pass instance of estimator to run sklearn's built in estimator check
+    check_estimator(ffx.FFXRegressor())
+
