@@ -15,7 +15,7 @@ setup(
     url='https://github.com/natekupp/ffx',
     packages=find_packages(exclude=['ffx_tests']),
     entry_points={'console_scripts': ['ffx = ffx.cli:main']},
-    install_requires=['click>=5.0', 'contextlib2>=0.5.4', 'numpy', 'pandas', 'six', 'sklearn',],
+    install_requires=['click>=5.0', 'contextlib2>=0.5.4', 'numpy', 'pandas', 'six', 'scikit-learn',],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
