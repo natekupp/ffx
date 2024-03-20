@@ -1,4 +1,4 @@
-black==19.10b0; python_version >= '3.6'
+black==24.3.0; python_version >= '3.6'
 coveralls==1.9.2
 codecov
 isort>=4.3.21
