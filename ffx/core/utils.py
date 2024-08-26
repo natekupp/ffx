@@ -84,7 +84,7 @@ def nondominated_indices_2d(cost0s, cost1s):
 
 def y_is_poor(y):
     '''Returns True if y is not usable'''
-    return max(scipy.isinf(y)) or max(scipy.isnan(y))
+    return max(np.isinf(y)) or max(np.isnan(y))
 
 
 def coef_str(x):

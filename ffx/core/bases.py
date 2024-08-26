@@ -86,7 +86,7 @@ class OperatorBase(Base):
         elif op == OP_LOG10:
             # safeguard against: log() on values <= 0.0
             mn, mx = min(y_lin), max(y_lin)
-            if mn <= 0.0 or scipy.isnan(mn) or mx == INF or scipy.isnan(mx):
+            if mn <= 0.0 or np.isnan(mn) or mx == INF or np.isnan(mx):
                 ok = False
             else:
                 ya = np.log10(y_lin)
