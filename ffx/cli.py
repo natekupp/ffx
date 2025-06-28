@@ -38,9 +38,9 @@ def splitdata(x_file, y_file):
         return
 
     # create the target output filenames, and ensure they don't exist
-    join = lambda n, prefix: os.path.join(
-        os.path.dirname(n), prefix + os.path.basename(n)
-    )
+    def join(n, prefix):
+        return os.path.join(os.path.dirname(n), prefix + os.path.basename(n))
+
     train_X_file = join(x_file, "train_")
     train_y_file = join(y_file, "train_")
     test_X_file = join(x_file, "test_")

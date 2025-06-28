@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 from ffx.time_utils import timeout
-from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import ElasticNet  # type: ignore
 
 from .constants import INF, MAX_TIME_REGULARIZE_UPDATE
 

@@ -1,5 +1,9 @@
 # Changes
 
+## 2.1.0
+
+- Migrated FFX to uv / ruff and removed Travis CI for Github Actions
+
 ## 2.0.1 / 2.0.2
 
 - Fix ImportError introduced in 2.0.0
