@@ -1,21 +1,13 @@
-import os
 import signal
-import sys
 import time
 from contextlib import contextmanager
 from functools import wraps
-
-if sys.version_info.major >= 3 and sys.version_info.minor >= 3:
-    time_fn = time.perf_counter
-elif os.name == 'nt':
-    time_fn = time.clock
-else:
-    time_fn = time.time
+from builtins import TimeoutError
 
 
 class TimerResult:
     def __init__(self):
-        self.start_time = time_fn()
+        self.start_time = time.perf_counter()
         self.end_time = None
 
     @property
@@ -29,7 +21,7 @@ class TimerResult:
 
 @contextmanager
 def time_execution_scope():
-    '''Usage:
+    """Usage:
 
     with time_execution_scope() as timer_result:
         do_some_operation()
@@ -39,18 +31,11 @@ def time_execution_scope():
             timer_result=timer_result
         )
     )
-    '''
+    """
 
     timer_result = TimerResult()
     yield timer_result
-    timer_result.end_time = time_fn()
-
-
-try:
-    from builtins import TimeoutError  # pylint: disable=unused-import
-except ImportError:
-    # TimeoutError was introduced in python 3.3+
-    TimeoutError = OSError
+    timer_result.end_time = time.perf_counter()
 
 
 def timeout(seconds_before_timeout):
