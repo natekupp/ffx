@@ -60,14 +60,14 @@ class FFXModel(RegressorMixin):
         # numerator
         y = numpy.zeros(N, dtype=float)
         y += self.coefs_n[0]
-        for (coef, base) in zip(self.coefs_n[1:], self.bases_n):
+        for coef, base in zip(self.coefs_n[1:], self.bases_n):
             y += coef * base.simulate(X)
 
         # denominator
         if self.bases_d:
             denom_y = numpy.zeros(N, dtype=float)
             denom_y += 1.0
-            for (coef, base) in zip(self.coefs_d, self.bases_d):
+            for coef, base in zip(self.coefs_d, self.bases_d):
                 denom_y += coef * base.simulate(X)
             y /= denom_y
 
@@ -82,34 +82,34 @@ class FFXModel(RegressorMixin):
     def str2(self, maxlen=100000):
         include_denom = bool(self.bases_d)
 
-        s = ''
+        s = ""
         # numerator
         if include_denom and len(self.coefs_n) > 1:
-            s += '('
-        numer_s = ['%s' % coef_str(self.coefs_n[0])]
-        for (coef, base) in zip(self.coefs_n[1:], self.bases_n):
-            numer_s += ['%s*%s' % (coef_str(coef), base)]
-        s += ' + '.join(numer_s)
+            s += "("
+        numer_s = ["%s" % coef_str(self.coefs_n[0])]
+        for coef, base in zip(self.coefs_n[1:], self.bases_n):
+            numer_s += ["%s*%s" % (coef_str(coef), base)]
+        s += " + ".join(numer_s)
         if include_denom and len(self.coefs_n) > 1:
-            s += ')'
+            s += ")"
 
         # denominator
         if self.bases_d:
-            s += ' / ('
-            denom_s = ['1.0']
-            for (coef, base) in zip(self.coefs_d, self.bases_d):
-                denom_s += ['%s*%s' % (coef_str(coef), base)]
-            s += ' + '.join(denom_s)
-            s += ')'
+            s += " / ("
+            denom_s = ["1.0"]
+            for coef, base in zip(self.coefs_d, self.bases_d):
+                denom_s += ["%s*%s" % (coef_str(coef), base)]
+            s += " + ".join(denom_s)
+            s += ")"
 
         # change xi to actual variable names
         for var_i in range(len(self.varnames) - 1, -1, -1):
-            s = s.replace('x%d' % var_i, self.varnames[var_i])
-        s = s.replace('+ -', '- ')
+            s = s.replace("x%d" % var_i, self.varnames[var_i])
+        s = s.replace("+ -", "- ")
 
         # truncate long strings
         if len(s) > maxlen:
-            s = s[:maxlen] + '...'
+            s = s[:maxlen] + "..."
 
         return s
 

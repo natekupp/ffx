@@ -1,7 +1,6 @@
 import math
 
 import numpy as np
-import scipy
 from ffx.time_utils import timeout
 from sklearn.linear_model import ElasticNet
 
@@ -13,7 +12,6 @@ from .constants import INF, MAX_TIME_REGULARIZE_UPDATE
 
 
 class ElasticNetWithTimeout(ElasticNet):
-
     # if this freezes, then exit with a TimeoutError
     @timeout(MAX_TIME_REGULARIZE_UPDATE)
     def fit(self, X, y, check_input=True):
@@ -21,7 +19,7 @@ class ElasticNetWithTimeout(ElasticNet):
 
 
 def nondominated_indices_2d(cost0s, cost1s):
-    '''
+    """
     @description
         Find indices of individuals that are on the nondominated 2-d tradeoff.
 
@@ -32,7 +30,7 @@ def nondominated_indices_2d(cost0s, cost1s):
     @return
       nondomI -- list of int -- nondominated indices; each is in range [0, #inds - 1]
                 ALWAYS returns at least one entry if there is valid data
-    '''
+    """
     cost0s, cost1s = np.asarray(cost0s), np.asarray(cost1s)
     n_points = len(cost0s)
     assert n_points == len(cost1s)
@@ -83,38 +81,38 @@ def nondominated_indices_2d(cost0s, cost1s):
 
 
 def y_is_poor(y):
-    '''Returns True if y is not usable'''
+    """Returns True if y is not usable"""
     return max(np.isinf(y)) or max(np.isnan(y))
 
 
 def coef_str(x):
-    '''Gracefully print a number to 3 significant digits.  See _testcoef_str in
-    unit tests'''
+    """Gracefully print a number to 3 significant digits.  See _testcoef_str in
+    unit tests"""
     if x == 0.0:
-        s = '0'
+        s = "0"
     elif np.abs(x) < 1e-4:
-        s = ('%.2e' % x).replace('e-0', 'e-')
+        s = ("%.2e" % x).replace("e-0", "e-")
     elif np.abs(x) < 1e-3:
-        s = '%.6f' % x
+        s = "%.6f" % x
     elif np.abs(x) < 1e-2:
-        s = '%.5f' % x
+        s = "%.5f" % x
     elif np.abs(x) < 1e-1:
-        s = '%.4f' % x
+        s = "%.4f" % x
     elif np.abs(x) < 1e0:
-        s = '%.3f' % x
+        s = "%.3f" % x
     elif np.abs(x) < 1e1:
-        s = '%.2f' % x
+        s = "%.2f" % x
     elif np.abs(x) < 1e2:
-        s = '%.1f' % x
+        s = "%.1f" % x
     elif np.abs(x) < 1e4:
-        s = '%.0f' % x
+        s = "%.0f" % x
     else:
-        s = ('%.2e' % x).replace('e+0', 'e')
+        s = ("%.2e" % x).replace("e+0", "e")
     return s
 
 
 def nmse(yhat, y, min_y, max_y):
-    '''
+    """
     @description
         Calculates the normalized mean-squared error.
 
@@ -127,7 +125,7 @@ def nmse(yhat, y, min_y, max_y):
 
     @return
         nmse -- float -- normalized mean-squared error
-    '''
+    """
     # base case: no entries
     if len(yhat) == 0:
         return 0.0
@@ -137,7 +135,7 @@ def nmse(yhat, y, min_y, max_y):
         return 0.0
 
     # main case
-    assert max_y > min_y, 'max_y=%g was not > min_y=%g' % (max_y, min_y)
+    assert max_y > min_y, "max_y=%g was not > min_y=%g" % (max_y, min_y)
     yhat_a, y_a = np.asarray(yhat), np.asarray(y)
     y_range = float(max_y - min_y)
 

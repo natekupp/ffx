@@ -4,7 +4,7 @@ CONSIDER_EXPON = True  # consider exponents?
 CONSIDER_NONLIN = True  # consider abs() and log()?
 CONSIDER_THRESH = True  # consider hinge functions?
 
-INF = float('Inf')
+INF = float("Inf")
 # maximum time (s) for regularization update during pathwise learn.
 MAX_TIME_REGULARIZE_UPDATE = 5
 
