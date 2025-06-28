@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r dev-requirements.txt
+        pip install -e .
+
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$(pwd):$PYTHONPATH" >> $GITHUB_ENV
+
+    - name: Run validation
+      run: |
+        if [ -z "$NOVALIDATE" ]; then
+          make validate
+        else
+          echo "skipping validate"
+        fi
+
+    - name: Run tests with coverage
+      run: pytest --cov ffx
+
+    - name: Upload coverage to Coveralls
+      if: matrix.python-version == '3.11'
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        coveralls-endpoint: https://coveralls.io

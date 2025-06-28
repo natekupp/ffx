@@ -1,6 +1,6 @@
 # FFX: Fast Function Extraction
 
-[![Build Status at Travis CI](https://travis-ci.org/natekupp/ffx.svg?branch=master)](https://travis-ci.org/natekupp/ffx)
+[![CI](https://github.com/natekupp/ffx/workflows/CI/badge.svg)](https://github.com/natekupp/ffx/actions?query=workflow%3ACI)
 [![Coverage Status](https://coveralls.io/repos/github/natekupp/ffx/badge.svg?branch=master)](https://coveralls.io/github/natekupp/ffx?branch=master)
 
 FFX is a technique for symbolic regression. It is:
