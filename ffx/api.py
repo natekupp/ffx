@@ -2,9 +2,9 @@
 FFXRegressor is a Scikit-learn style regressor.
 """
 
-from sklearn.base import BaseEstimator, RegressorMixin  # type: ignore
-from sklearn.utils import check_array, check_X_y  # type: ignore
-from sklearn.utils.validation import check_is_fitted  # type: ignore
+from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.utils import check_array, check_X_y
+from sklearn.utils.validation import check_is_fitted
 
 
 def run(train_X, train_y, test_X, test_y, varnames=None, verbose=False):

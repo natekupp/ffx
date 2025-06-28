@@ -46,11 +46,11 @@ packages = ["ffx"]
 
 [dependency-groups]
 dev = [
-    "codecov>=2.1.13",
     "coveralls>=4.0.1",
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
     "ruff>=0.12.1",
+    "ty>=0.0.1a12",
 ]
 
 [tool.ruff]

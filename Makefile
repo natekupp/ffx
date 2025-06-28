@@ -5,14 +5,16 @@ install:
 install-dev:
 	uv sync --dev
 
-# Linting and formatting
 lint:
 	uv run ruff check ffx
 
 format:
 	uv run ruff format ffx
 
-validate: lint format
+typecheck:
+	uv run ty check ffx
+
+validate: lint format typecheck
 
 # Testing
 test:
