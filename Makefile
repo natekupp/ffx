@@ -1,19 +1,36 @@
-pylint:
-	pylint -j 0 `git ls-files '*.py'` --rcfile=.pylintrc
+# Install dependencies
+install:
+	uv sync
 
-black:
-	black ffx --line-length 100 --target-version py27 --target-version py35 --target-version py36 --target-version py37 --target-version py38 -S --fast --exclude "build/|buck-out/|dist/|_build/|\.eggs/|\.git/|\.hg/|\.mypy_cache/|\.nox/|\.tox/|\.venv/"
+install-dev:
+	uv sync --dev
 
-isort:
-	isort -rc -y
+# Linting and formatting
+lint:
+	uv run ruff check ffx
 
-validate: pylint isort black
+format:
+	uv run ruff format ffx
+
+validate: lint format
+
+# Testing
+test:
+	uv run pytest ffx_tests/
+
+test-cov:
+	uv run pytest ffx_tests/ --cov=ffx
+
+# Build and publish
+build:
+	uv build
 
 pypi:
-	rm -rf dist/*
-	python setup.py sdist bdist_egg bdist_wheel
-	twine upload dist/*
-	#twine upload --repository-url https://test.pypi.org/legacy/ dist/* # testpypi
+	uv build
+	uv publish
 
-test:
-	pytest ffx_tests/
+# Clean
+clean:
+	rm -rf dist/
+	rm -rf build/
+	rm -rf *.egg-info/

@@ -3,13 +3,13 @@ from .constants import OP_ABS, OP_GTH, OP_LOG10, OP_LTH
 
 
 class FFXBuildStrategy:
-    '''All parameter settings.  Put magic numbers here.'''
+    """All parameter settings.  Put magic numbers here."""
 
     def __init__(self, approach):
-        '''
+        """
         @arguments
           approach -- Approach object
-        '''
+        """
         assert isinstance(approach, Approach)
         self.approach = approach
 
