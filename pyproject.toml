@@ -55,3 +55,10 @@ dev = [
 
 [tool.ruff]
 lint.ignore = ["E741"]
+
+[tool.coverage.run]
+source = ["ffx"]
+omit = ["*/*_tests/*", "*/__pycache__/*", "*/venv/*", "*/env/*"]
+
+[tool.coverage.xml]
+output = "coverage.xml"

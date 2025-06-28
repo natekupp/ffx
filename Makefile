@@ -21,7 +21,7 @@ test:
 	uv run pytest ffx_tests/
 
 test-cov:
-	uv run pytest ffx_tests/ --cov=ffx
+	uv run pytest ffx_tests/ --cov=ffx --cov-report=term-missing --cov-report=xml
 
 # Build and publish
 build:
