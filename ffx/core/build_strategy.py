@@ -26,6 +26,9 @@ class FFXBuildStrategy:
         # eps -- Length of the path. eps=1e-3 means that alpha_min / alpha_max
         # = 1e-3.
         self._eps = 1e-70
+        
+        # Optimization strategy: 'pathwise' (original) or 'cv' (improved)
+        self._optimization_strategy = 'cv'
 
         # will use all if 'nonlin1', else []
         self.all_nonlin_ops = [OP_ABS, OP_LOG10]
@@ -63,3 +66,7 @@ class FFXBuildStrategy:
     @property
     def num_alphas(self):
         return self._num_alphas
+    
+    @property
+    def optimization_strategy(self):
+        return self._optimization_strategy
